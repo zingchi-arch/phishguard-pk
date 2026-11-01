@@ -1,0 +1,4 @@
+model,split,accuracy,precision_macro,recall_macro,f1_macro
+Naive Bayes,test_WEAK_LABELS,0.9667,0.7082,0.6839,0.6918
+Linear SVM,test_WEAK_LABELS,0.9786,0.6495,0.6582,0.6538
+Random Forest,test_WEAK_LABELS,0.969,0.6851,0.6807,0.6827

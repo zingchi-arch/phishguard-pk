@@ -1,0 +1,4 @@
+model,selection_split,accuracy,precision_macro,recall_macro,f1_macro
+Random Forest,validation,0.9708,0.7803,0.7513,0.7649
+Linear SVM,validation,0.9793,0.6502,0.656,0.6531
+Naive Bayes,validation,0.9647,0.6427,0.6453,0.644

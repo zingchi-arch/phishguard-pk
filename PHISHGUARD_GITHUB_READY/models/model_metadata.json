@@ -1,0 +1,19 @@
+{
+  "status": "Research demonstration, weak-label and synthetic training data",
+  "language_support": [
+    "English",
+    "Roman Urdu",
+    "Urdu"
+  ],
+  "best_text_model": "Random Forest",
+  "model_input": "message text",
+  "trained_on_unapproved_labels": true,
+  "calibrated_realworld_probability": false,
+  "url_supervision": "Synthetic-only demo",
+  "limitations": [
+    "Urdu-script samples mostly synthetic",
+    "Suspicious class mainly synthetic",
+    "Weak public labels, no independent annotation",
+    "Not production security advice"
+  ]
+}

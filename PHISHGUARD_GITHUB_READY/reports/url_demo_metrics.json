@@ -1,0 +1,25 @@
+{
+  "n_train": 390,
+  "n_test": 150,
+  "accuracy": 1.0,
+  "macro_f1": 1.0,
+  "feature_importance": {
+    "url_length": 0.1339,
+    "host_length": 0.0649,
+    "dot_count": 0.0707,
+    "hyphen_count": 0.157,
+    "at_count": 0.0,
+    "digit_count": 0.0411,
+    "special_count": 0.0192,
+    "https": 0.1002,
+    "shortener": 0.0361,
+    "ip_host": 0.0411,
+    "keyword_hits": 0.3264,
+    "many_subdomains": 0.0095,
+    "punycode": 0.0,
+    "has_userinfo": 0.0,
+    "very_new_domain": 0.0
+  },
+  "critical_note": "SYNTHETIC scenario-derived URLs only. These metrics are NOT real phishing-detection accuracy.",
+  "domain_age": "Optional WHOIS only; unknown by default because external querying is disabled."
+}

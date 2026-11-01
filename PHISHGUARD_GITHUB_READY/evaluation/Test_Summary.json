@@ -1,0 +1,82 @@
+{
+  "n": 90,
+  "verdict_correct": 59,
+  "language_correct": 87,
+  "by_language": {
+    "English": {
+      "n": 30,
+      "verdict_correct": 16,
+      "language_correct": 30,
+      "by_class": {
+        "Safe": {
+          "n": 10,
+          "correct": 10
+        },
+        "Suspicious": {
+          "n": 10,
+          "correct": 0
+        },
+        "Scam": {
+          "n": 10,
+          "correct": 6
+        }
+      }
+    },
+    "Roman Urdu": {
+      "n": 30,
+      "verdict_correct": 19,
+      "language_correct": 27,
+      "by_class": {
+        "Safe": {
+          "n": 10,
+          "correct": 10
+        },
+        "Suspicious": {
+          "n": 10,
+          "correct": 1
+        },
+        "Scam": {
+          "n": 10,
+          "correct": 8
+        }
+      }
+    },
+    "Urdu": {
+      "n": 30,
+      "verdict_correct": 24,
+      "language_correct": 30,
+      "by_class": {
+        "Safe": {
+          "n": 10,
+          "correct": 10
+        },
+        "Suspicious": {
+          "n": 10,
+          "correct": 6
+        },
+        "Scam": {
+          "n": 10,
+          "correct": 8
+        }
+      }
+    }
+  },
+  "caveat": "All 90 fixtures are newly written synthetic/manual demonstration cases. Not an independent real-world study; labels, especially Suspicious, are subjective; near-template leakage has not been excluded. Do not report as a real-world accuracy metric.",
+  "confusion": {
+    "Safe": {
+      "Safe": 30,
+      "Suspicious": 0,
+      "Scam": 0
+    },
+    "Suspicious": {
+      "Safe": 23,
+      "Suspicious": 7,
+      "Scam": 0
+    },
+    "Scam": {
+      "Safe": 8,
+      "Suspicious": 0,
+      "Scam": 22
+    }
+  }
+}

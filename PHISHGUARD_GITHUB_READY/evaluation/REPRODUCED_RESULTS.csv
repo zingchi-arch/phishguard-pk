@@ -1,0 +1,91 @@
+﻿message,language_expected,expected_label,predicted_label,detected_language,risk_score,correct_verdict,correct_language
+The biology lab practical begins on Wednesday at 9 AM in room 204.,English,Safe,Safe,English,14.7,1,1
+Thanks for the meeting. I will send the revised document this evening.,English,Safe,Safe,English,9.3,1,1
+Your appointment at the dental clinic is confirmed for Monday at 3 PM.,English,Safe,Safe,English,20.3,1,1
+Your order has shipped. The tracking details are available inside your official shopping app.,English,Safe,Safe,English,18.2,1,1
+Welcome to the library! Your membership card is ready for pickup.,English,Safe,Safe,English,10.4,1,1
+Your one-time code is 123456. Do not share this code with anyone.,English,Safe,Safe,English,23.1,1,1
+The school will remain closed tomorrow due to scheduled maintenance.,English,Safe,Safe,English,5.8,1,1
+Your bank statement is ready to view by signing in through the official bank app. Never share your PIN.,English,Safe,Safe,English,10.6,1,1
+"Hi Ali, dinner is at 8 tonight. See you at home.",English,Safe,Safe,English,13.8,1,1
+You can read the meeting agenda at https://example.org/agenda before Monday.,English,Safe,Safe,English,12.5,1,1
+"Hi, I found your profile online. Can you message me privately for a business opportunity?",English,Suspicious,Safe,English,7.4,0,1
+You may be eligible for a prize. Please confirm with the organizers.,English,Suspicious,Safe,English,27.9,0,1
+Your document needs attention. Check with your office administrator today.,English,Suspicious,Safe,English,10.7,0,1
+A limited time shopping offer is waiting for you. Check the seller carefully.,English,Suspicious,Safe,English,3.0,0,1
+Someone says they are from customer support and wants to contact you on WhatsApp.,English,Suspicious,Safe,English,21.1,0,1
+An unknown sender says you have a delivery waiting but gives no tracking number.,English,Suspicious,Safe,English,16.2,0,1
+Please review your recent account activity. This notice comes from an unknown number.,English,Suspicious,Safe,English,36.2,0,1
+I have a part time job for you. Let us discuss the terms by private message.,English,Suspicious,Safe,English,2.7,0,1
+You have been added to an investment updates group by a person you do not know.,English,Suspicious,Safe,English,17.3,0,1
+An unfamiliar sender asks you to visit https://update-notice.example for account news.,English,Suspicious,Safe,English,23.8,0,1
+Final warning: your bank account is blocked. Send your OTP to restore access.,English,Scam,Scam,English,85.0,1,1
+You won 50000 rupees! Share your bank account details now to collect the reward.,English,Scam,Scam,English,85.0,1,1
+The parcel is stuck. Enter your card number on http://parcel-fee.example/claim to release it.,English,Scam,Scam,English,85.0,1,1
+Tax refund waiting! Give your CNIC and password to the agent immediately.,English,Scam,Safe,English,21.8,0,1
+Pay a registration fee first to unlock your promised online job salary.,English,Scam,Safe,English,26.4,0,1
+I am your manager. Buy gift cards and send the codes secretly right now.,English,Scam,Safe,English,17.4,0,1
+Your phone SIM will be disabled tonight. Submit your verification code in this chat.,English,Scam,Scam,English,70.0,1,1
+Guaranteed huge return: send your deposit to this stranger before midnight.,English,Scam,Safe,English,13.0,0,1
+You have won a lottery. Click http://claim-bonus.example/login and provide bank details.,English,Scam,Scam,English,85.0,1,1
+"Police challan pending, pay immediately using http://fine-check.example/verify and enter your card PIN.",English,Scam,Scam,English,85.0,1,1
+"Kal subah 9 baje class shuru hogi, apni copy sath lana.",Roman Urdu,Safe,Safe,English,12.9,1,0
+"Assalam o alaikum, aj sham meeting 6 baje hai.",Roman Urdu,Safe,Safe,English,8.9,1,0
+Apki clinic appointment monday ko 4 baje confirm hai.,Roman Urdu,Safe,Safe,Roman Urdu,12.8,1,1
+"Aaj parcel deliver ho gaya hai, shukriya.",Roman Urdu,Safe,Safe,Roman Urdu,26.7,1,1
+Ammi keh rahi hain ke ghar ate hue doodh le ana.,Roman Urdu,Safe,Safe,Roman Urdu,14.0,1,1
+Aap ka OTP 123456 hai. Kisi ko bhi ye code share na karein.,Roman Urdu,Safe,Safe,Roman Urdu,27.0,1,1
+"Bank statement sirf official app mein check karein, PIN kabhi share na karein.",Roman Urdu,Safe,Safe,Roman Urdu,36.9,1,1
+"School ki chutti kal rahe gi, classes parson se hongi.",Roman Urdu,Safe,Safe,Roman Urdu,9.6,1,1
+"Document revise kar ke email kar diya hai, dekh lena.",Roman Urdu,Safe,Safe,Roman Urdu,33.5,1,1
+Meeting ki details https://example.org/agenda par available hain.,Roman Urdu,Safe,Safe,Roman Urdu,18.9,1,1
+"Aap ka profile dekha hai, online kaam ki opportunity discuss karni hai.",Roman Urdu,Suspicious,Safe,Roman Urdu,36.3,0,1
+Apka parcel aya hai lekin tracking number abhi available nahi.,Roman Urdu,Suspicious,Safe,Roman Urdu,38.5,0,1
+Aik naye group mein add kiya hai jahan investment ki tips milti hain.,Roman Urdu,Suspicious,Safe,Roman Urdu,41.9,0,1
+"Aap ke liye ek special offer ho sakti hai, seller se tasdeeq kar lein.",Roman Urdu,Suspicious,Safe,Roman Urdu,41.4,0,1
+"Unknown number se message aya hai, wo customer support se hone ka keh raha hai.",Roman Urdu,Suspicious,Safe,Roman Urdu,42.2,0,1
+"Aapka account review mein hai, official app par check kar lein.",Roman Urdu,Suspicious,Suspicious,Roman Urdu,48.9,1,1
+"Mujhe aap se zaroori kaam ki baat karni hai, inbox mein aa jayein.",Roman Urdu,Suspicious,Safe,Roman Urdu,29.1,0,1
+"Part-time job hai, salary aur terms baad mein batayen ge.",Roman Urdu,Suspicious,Safe,English,17.5,0,0
+Aik ajnabi kehta hai apke naam ka inaam hai lekin details clear nahi.,Roman Urdu,Suspicious,Safe,Roman Urdu,36.7,0,1
+Apki online booking ke hawale se update https://account-note.example par hai.,Roman Urdu,Suspicious,Safe,Roman Urdu,20.5,0,1
+"Apka bank account block ho gaya hai, abhi OTP bhejein warna band rahega.",Roman Urdu,Scam,Scam,Roman Urdu,85.0,1,1
+"Mubarak ho 50 hazar ka inaam jeet liya, bank details foran share karein.",Roman Urdu,Scam,Scam,Roman Urdu,85.0,1,1
+Parcel lene ke liye http://delivery-fee.example par card number enter karo.,Roman Urdu,Scam,Scam,Roman Urdu,70.0,1,1
+"FBR refund aaya hai, CNIC aur password agent ko abhi bhej dein.",Roman Urdu,Scam,Scam,Roman Urdu,85.0,1,1
+Naukri confirm hai lekin pehle registration fee jama karo.,Roman Urdu,Scam,Safe,Roman Urdu,39.1,0,1
+"Main apka boss bol raha hun, gift card codes abhi chupke se bhej do.",Roman Urdu,Scam,Scam,Roman Urdu,65.0,1,1
+"SIM band ho jayegi, verification code WhatsApp par send karo.",Roman Urdu,Scam,Scam,Roman Urdu,85.0,1,1
+"Paise double karne ki guarantee hai, aaj hi deposit bhejein.",Roman Urdu,Scam,Safe,Roman Urdu,42.9,0,1
+Inaam claim karne ke liye http://reward-now.example/login par bank info darj karo.,Roman Urdu,Scam,Scam,Roman Urdu,65.0,1,1
+Fake traffic challan: abhi http://pay-fine.example par jao aur card PIN enter karo.,Roman Urdu,Scam,Scam,Roman Urdu,85.0,1,1
+کل صبح نو بجے کلاس شروع ہوگی، براہ کرم وقت پر آئیں۔,Urdu,Safe,Safe,Urdu,24.4,1,1
+آپ کی کلینک اپائنٹمنٹ پیر کو تین بجے طے ہے۔,Urdu,Safe,Safe,Urdu,25.6,1,1
+آپ کا آرڈر پہنچ گیا ہے، خریداری کا شکریہ۔,Urdu,Safe,Safe,Urdu,33.0,1,1
+آج شام چھ بجے ہماری میٹنگ ہوگی۔,Urdu,Safe,Safe,Urdu,6.2,1,1
+برائے مہربانی کل کی پریزنٹیشن تیار کر لیجیے۔,Urdu,Safe,Safe,Urdu,29.7,1,1
+آپ کا تصدیقی کوڈ ۱۲۳۴۵۶ ہے، یہ کوڈ کسی کو نہ بتائیں۔,Urdu,Safe,Safe,Urdu,28.1,1,1
+بینک کی تفصیل صرف سرکاری ایپ میں دیکھیں اور اپنا پن ہرگز نہ دیں۔,Urdu,Safe,Safe,Urdu,37.4,1,1
+اسکول کل بند رہے گا، کلاسیں پرسوں شروع ہوں گی۔,Urdu,Safe,Safe,Urdu,10.3,1,1
+میں نے فائل ای میل کر دی ہے، فرصت میں دیکھ لیجیے۔,Urdu,Safe,Safe,Urdu,37.9,1,1
+اجلاس کی تفصیلات https://example.org/agenda پر دستیاب ہیں۔,Urdu,Safe,Safe,Urdu,17.1,1,1
+آپ کی پروفائل دیکھی ہے، آن لائن کام کے لیے رابطہ کرنا چاہتا ہوں۔,Urdu,Suspicious,Suspicious,Urdu,53.9,1,1
+آپ کے نام کا پارسل آیا ہے مگر کوئی ٹریکنگ نمبر نہیں دیا گیا۔,Urdu,Suspicious,Safe,Urdu,42.4,0,1
+ایک اجنبی نے آپ کو سرمایہ کاری کے گروپ میں شامل کیا ہے۔,Urdu,Suspicious,Suspicious,Urdu,47.3,1,1
+آپ کے لیے خصوصی آفر ہو سکتی ہے، پہلے دکاندار سے تصدیق کریں۔,Urdu,Suspicious,Suspicious,Urdu,59.2,1,1
+نامعلوم نمبر سے کسی نے کسٹمر سپورٹ ہونے کا دعویٰ کیا ہے۔,Urdu,Suspicious,Safe,Urdu,33.6,0,1
+آپ کے اکاؤنٹ کا جائزہ لیا جا رہا ہے، سرکاری ایپ پر چیک کریں۔,Urdu,Suspicious,Suspicious,Urdu,61.9,1,1
+مجھے آپ سے اہم بات کرنی ہے، ذاتی پیغام بھیجیں۔,Urdu,Suspicious,Suspicious,Urdu,45.5,1,1
+پارٹ ٹائم ملازمت ہے لیکن تنخواہ اور شرائط ابھی واضح نہیں۔,Urdu,Suspicious,Safe,Urdu,27.4,0,1
+ایک نامعلوم شخص کا کہنا ہے کہ آپ کے لیے انعام موجود ہے۔,Urdu,Suspicious,Suspicious,Urdu,52.8,1,1
+آپ کی بکنگ کا نیا پیغام https://update-note.example پر موجود ہے۔,Urdu,Suspicious,Safe,Urdu,31.5,0,1
+آپ کا بینک اکاؤنٹ بند ہو گیا ہے، فوراً او ٹی پی ہمیں بھیجیں۔,Urdu,Scam,Scam,Urdu,85.0,1,1
+مبارک ہو آپ نے پچاس ہزار روپے جیتے ہیں، انعام لینے کے لیے بینک تفصیلات فراہم کریں۔,Urdu,Scam,Scam,Urdu,85.0,1,1
+پارسل حاصل کرنے کے لیے http://parcel-pay.example پر اپنا کارڈ نمبر درج کریں۔,Urdu,Scam,Scam,Urdu,70.0,1,1
+ٹیکس ریفنڈ حاصل کریں، فوری طور پر شناختی کارڈ اور پاس ورڈ بھیجیں۔,Urdu,Scam,Scam,Urdu,85.0,1,1
+نوکری پکی ہے، لیکن پہلے رجسٹریشن فیس بھیجیں۔,Urdu,Scam,Safe,Urdu,40.1,0,1
+میں آپ کا افسر ہوں، فوری طور پر گفٹ کارڈ کے خفیہ کوڈ بھیجیں۔,Urdu,Scam,Scam,Urdu,85.0,1,1
+آپ کی سم بند ہو جائے گی، تصدیقی کوڈ اس چیٹ میں شیئر کریں۔,Urdu,Scam,Scam,Urdu,65.0,1,1
+منافع دوگنا کرنے کی ضمانت ہے، ابھی رقم جمع کروائیں۔,Urdu,Scam,Safe,Urdu,39.4,0,1
+انعام کے لیے http://claim-prize.example/login پر بینک معلومات درج کریں۔,Urdu,Scam,Scam,Urdu,65.0,1,1
+ٹریفک چالان کی ادائیگی کے لیے http://challan-pay.example پر پن درج کریں۔,Urdu,Scam,Scam,Urdu,70.0,1,1

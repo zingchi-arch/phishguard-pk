@@ -1,0 +1,126 @@
+{
+  "best_by_validation": "Random Forest",
+  "split_counts": {
+    "train": 4088,
+    "validation": 822,
+    "test": 840
+  },
+  "validation_results": [
+    {
+      "model": "Naive Bayes",
+      "selection_split": "validation",
+      "accuracy": 0.9647,
+      "precision_macro": 0.6427,
+      "recall_macro": 0.6453,
+      "f1_macro": 0.644
+    },
+    {
+      "model": "Linear SVM",
+      "selection_split": "validation",
+      "accuracy": 0.9793,
+      "precision_macro": 0.6502,
+      "recall_macro": 0.656,
+      "f1_macro": 0.6531
+    },
+    {
+      "model": "Random Forest",
+      "selection_split": "validation",
+      "accuracy": 0.9708,
+      "precision_macro": 0.7803,
+      "recall_macro": 0.7513,
+      "f1_macro": 0.7649
+    }
+  ],
+  "test_results": [
+    {
+      "model": "Naive Bayes",
+      "split": "test_WEAK_LABELS",
+      "accuracy": 0.9667,
+      "precision_macro": 0.7082,
+      "recall_macro": 0.6839,
+      "f1_macro": 0.6918
+    },
+    {
+      "model": "Linear SVM",
+      "split": "test_WEAK_LABELS",
+      "accuracy": 0.9786,
+      "precision_macro": 0.6495,
+      "recall_macro": 0.6582,
+      "f1_macro": 0.6538
+    },
+    {
+      "model": "Random Forest",
+      "split": "test_WEAK_LABELS",
+      "accuracy": 0.969,
+      "precision_macro": 0.6851,
+      "recall_macro": 0.6807,
+      "f1_macro": 0.6827
+    }
+  ],
+  "by_language_weak_test": {
+    "English": {
+      "n": 177,
+      "accuracy": 0.9548,
+      "f1_macro": 0.5347,
+      "synthetic_n": 15,
+      "warning": "Non-independent source labels and synthetic scenarios; interpret cautiously."
+    },
+    "Roman Urdu": {
+      "n": 127,
+      "accuracy": 0.9606,
+      "f1_macro": 0.6498,
+      "synthetic_n": 15,
+      "warning": "Non-independent source labels and synthetic scenarios; interpret cautiously."
+    },
+    "Unverified Latin": {
+      "n": 518,
+      "accuracy": 0.9942,
+      "f1_macro": 0.9932,
+      "synthetic_n": 0,
+      "warning": "Non-independent source labels and synthetic scenarios; interpret cautiously."
+    },
+    "Urdu": {
+      "n": 18,
+      "accuracy": 0.4444,
+      "f1_macro": 0.4651,
+      "synthetic_n": 15,
+      "warning": "Non-independent source labels and synthetic scenarios; interpret cautiously."
+    }
+  },
+  "classification_report_provisional": {
+    "Safe": {
+      "precision": 0.9817880794701986,
+      "recall": 0.9949664429530202,
+      "f1-score": 0.9883333333333333,
+      "support": 596.0
+    },
+    "Suspicious": {
+      "precision": 0.1,
+      "recall": 0.1111111111111111,
+      "f1-score": 0.10526315789473684,
+      "support": 9.0
+    },
+    "Scam": {
+      "precision": 0.9734513274336283,
+      "recall": 0.9361702127659575,
+      "f1-score": 0.9544468546637744,
+      "support": 235.0
+    },
+    "accuracy": 0.969047619047619,
+    "macro avg": {
+      "precision": 0.6850798023012756,
+      "recall": 0.6807492556100296,
+      "f1-score": 0.6826811152972815,
+      "support": 840.0
+    },
+    "weighted avg": {
+      "precision": 0.9700080444180249,
+      "recall": 0.969047619047619,
+      "f1-score": 0.9693917213496502,
+      "support": 840.0
+    }
+  },
+  "synthetic_rows_in_corpus": 213,
+  "sources_individually_reviewed": 0,
+  "critical_note": "NOT final performance: all public source labels provisional; some examples synthetic. No verified independent test."
+}

@@ -1,0 +1,46 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PhishGuard PK | Multilingual Message Security</title>
+<meta name="description" content="Analyze suspicious text and links in English, Roman Urdu and Urdu. Research-grade screening with transparent limitations.">
+<link rel="stylesheet" href="/styles.css">
+</head><body>
+<div class="shell">
+<header class="header">
+ <a class="brand" href="/" aria-label="PhishGuard PK home"><span class="brand-icon">⬡</span><span>PHISH<span class="accent">GUARD</span><small>PK</small></span></a>
+ <div class="header-right"><span class="operating"><span class="status-dot"></span> System operational</span><a href="/docs" target="_blank" rel="noopener noreferrer" class="api-link">API Docs ↗</a></div>
+</header>
+<main>
+ <div class="eyebrow"><span class="eyebrow-dot"></span> MULTILINGUAL SCAM & PHISHING DETECTION</div>
+ <section class="hero"><h1>Know the risk.<br><em>Before you click.</em></h1><p>Check suspicious SMS, WhatsApp and email messages in English, Roman Urdu and Urdu. Analyze links without opening them.</p></section>
+ <div class="trust-strip"><span>✓ English</span><span>✓ Roman Urdu</span><span>✓ اردو</span><span>◇ Links never opened</span></div>
+ <section class="workspace" aria-label="Message analysis workspace">
+  <div class="workspace-head"><h2>Message analyzer</h2><span class="tag">PRIVATE BY DESIGN · NO MESSAGE HISTORY</span></div>
+  <div class="tabs" role="tablist"><button id="single-tab" class="tab active" role="tab" aria-selected="true" aria-controls="single-panel">Single message</button><button id="batch-tab" class="tab" role="tab" aria-selected="false" aria-controls="batch-panel">Batch CSV <span class="pill">up to 100</span></button></div>
+  <div id="single-panel" role="tabpanel" class="panel">
+   <label class="fieldlabel" for="message">Paste the message to analyze</label>
+   <textarea id="message" dir="auto" maxlength="10000" placeholder="Paste an SMS, email, WhatsApp message, or suspicious link..." spellcheck="false"></textarea>
+   <div class="below-textarea"><span>Do not paste passwords, OTPs or personal details.</span><span id="counter">0 / 10,000</span></div>
+   <div class="form-actions"><button id="check" class="primary">Analyze message <span aria-hidden="true">→</span></button><button id="clear" class="secondary">Clear</button></div>
+   <div class="examples"><span class="examples-label">TRY AN EXAMPLE</span><button class="example" data-sample="safe">Safe meeting note</button><button class="example" data-sample="roman">Roman Urdu warning</button><button class="example" data-sample="urdu">اردو فراڈ</button><button class="example" data-sample="link">Suspicious link</button></div>
+   <p class="error" id="error" role="alert" hidden></p>
+   <div id="result" class="result" aria-live="polite" hidden>
+    <div class="result-summary"><div><div class="overline">ANALYSIS RESULT</div><div id="verdict" class="verdict"></div><div id="result-language" class="result-language"></div></div><div class="risk-panel"><div id="score" class="score"></div><div class="muted small">RISK INDICATOR / 100</div></div></div>
+    <div class="meter"><div id="meter-fill"></div></div>
+    <div class="result-columns"><div><h3>Why this result?</h3><ul id="reasons" class="reasons"></ul><h3>Flagged words</h3><div id="terms" class="term-list"></div></div><div><h3>Links inspected <span id="url-count"></span></h3><div id="urls"></div><div class="detail-block"><h3>Signals</h3><div id="signals"></div></div></div></div>
+    <div class="result-footer"><span>Risk indicators are not verified probabilities. A Safe result is not proof a message is genuine.</span><button id="export-json" class="secondary smallbutton">Export JSON ↓</button></div>
+   </div>
+  </div>
+  <div id="batch-panel" role="tabpanel" class="panel" hidden>
+   <h3 class="panel-subheading">Screen multiple messages in one upload</h3>
+   <p class="muted">Upload a UTF-8 CSV with a <code>message</code> column. Files are analyzed in memory, not saved to server disk. A maximum of 100 messages per batch is allowed.</p>
+   <div class="batch-controls"><input type="file" id="csv-file" accept=".csv,text/csv"><button id="batch-run" class="primary">Analyze CSV →</button><button id="sample-csv" class="secondary">Download sample CSV ↓</button></div>
+   <p id="batch-message" class="muted small" aria-live="polite"></p>
+   <div id="batch-results" hidden><div class="batch-head"><h3 id="batch-title">Results</h3><button id="download-csv" class="secondary smallbutton">Download results CSV ↓</button></div><div class="table-scroll"><table><thead><tr><th>#</th><th>Message</th><th>Language</th><th>Verdict</th><th>Risk / 100</th><th>URL count</th></tr></thead><tbody id="batch-rows"></tbody></table></div></div>
+  </div>
+ </section>
+ <section class="how-grid"><article><span class="step-number">01</span><h3>Read the text</h3><p>Language detection, text normalization and an ML classification model screen the message.</p></article><article><span class="step-number">02</span><h3>Inspect links</h3><p>URL features are checked offline. PhishGuard does not browse or activate suspected links.</p></article><article><span class="step-number">03</span><h3>Explain the signals</h3><p>See a combined risk indicator, matched terms and reasons to verify independently.</p></article></section>
+ <aside class="caution"><strong>Academic research build.</strong> The text model uses provisional labels, the offline URL checker is heuristic-based, and risk indicators are not calibrated fraud probabilities. Do not use results alone for financial or security decisions.</aside>
+</main>
+<footer><span>© 2026 PhishGuard-PK · BS Computer Science Final Year Project</span><span><a href="/health" target="_blank" rel="noopener">Health</a> · <a href="/model-status" target="_blank" rel="noopener">Model status</a> · <a href="/docs" target="_blank" rel="noopener">OpenAPI</a></span></footer>
+</div><script src="/app.js" defer></script>
+</body></html>

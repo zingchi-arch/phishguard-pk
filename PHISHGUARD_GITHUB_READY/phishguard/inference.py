@@ -1,0 +1,92 @@
+"""Combined text and URL analysis. Scores are indicative, not calibrated fraud probabilities."""
+from pathlib import Path
+import os
+import joblib
+import numpy as np
+from .preprocessing import detect_language
+from .urls import extract_urls, feature_vector, heuristic_url_risk, url_reasons, url_features
+from .explain import evidence_patterns, highlighted_terms, model_top_tokens, critical_rule_risk
+
+MODEL_DIR = Path(__file__).resolve().parents[1] / 'models'
+LABELS = ['Safe','Suspicious','Scam']
+# Provisional decision boundaries, selected using the DEVELOPMENT validation split.
+# Neither threshold nor risk indicator is a calibrated fraud probability.
+SUSPICIOUS_THRESHOLD = 45.0
+SCAM_THRESHOLD = 65.0
+
+class Analyzer:
+    def __init__(self, model_dir=MODEL_DIR):
+        self.model_dir=Path(model_dir)
+        self.text_model=joblib.load(self.model_dir/'text_model.joblib') if (self.model_dir/'text_model.joblib').exists() else None
+        self.text_backend='classical'
+        if os.environ.get('PHISHGUARD_TEXT_BACKEND','classical').lower()=='xlmr':
+            from .transformer_adapter import TransformerPredictor
+            self.text_model=TransformerPredictor(self.model_dir/'xlmr_development')
+            self.text_backend='xlmr'
+        self.url_model=joblib.load(self.model_dir/'url_model_real.joblib') if (self.model_dir/'url_model_real.joblib').exists() else None
+        self.model_metadata = {}
+        meta=self.model_dir/'model_metadata.json'
+        if meta.exists():
+            import json
+            self.model_metadata=json.loads(meta.read_text(encoding='utf-8'))
+
+    def analyze(self,message: str):
+        if not isinstance(message,str) or not message.strip():
+            raise ValueError('Please enter a message.')
+        if len(message)>10000:
+            raise ValueError('Message must be at most 10,000 characters.')
+        if self.text_model is None:
+            raise RuntimeError('Model missing. Run: python scripts/train_all.py')
+        language=detect_language(message)
+        probabilities=self.text_model.predict_proba([message])[0]
+        labels=list(self.text_model.classes_)
+        raw_probs={lab:float(probabilities[i]) for i,lab in enumerate(labels)}
+        probs={lab:raw_probs.get(lab,0.0) for lab in LABELS}
+        # Development model signal: 100% * (Scam + 0.5 Suspicious).
+        text_risk=100*(probs['Scam']+0.5*probs['Suspicious'])
+        urls=extract_urls(message)
+        url_results=[]
+        for u in urls[:10]:
+            heuristic=heuristic_url_risk(u)
+            rf_score=None
+            if self.url_model is not None:
+                try:rf_score=100*float(self.url_model.predict_proba([feature_vector(u)])[0][1])
+                except Exception:pass
+            # Model contribution is enabled ONLY if trained on independently labeled real URLs.
+            # Both indicators remain uncalibrated and do not imply that a URL is verified safe.
+            effective=max(heuristic, rf_score if rf_score is not None else 0)
+            url_results.append({'url':u,'risk_indicator':round(effective,1),
+                'heuristic_indicator':round(heuristic,1),
+                'real_data_rf_indicator':round(rf_score,1) if rf_score is not None else None,
+                'features':url_features(u), 'reasons':url_reasons(u)})
+        url_risk=max((r['risk_indicator'] for r in url_results),default=0)
+        # Both signals contribute when URLs exist. No URL => text only.
+        risk=0.7*text_risk+0.3*url_risk if urls else text_risk
+        rule_floor,rule_reason=critical_rule_risk(message)
+        risk=max(risk,rule_floor)
+        risk=round(float(min(100,max(0,risk))),1)
+        verdict='Scam' if risk>=SCAM_THRESHOLD else ('Suspicious' if risk>=SUSPICIOUS_THRESHOLD else 'Safe')
+        clues=evidence_patterns(message)
+        explanation=[]
+        if rule_reason: explanation.append(rule_reason)
+        if clues: explanation.extend(clues)
+        if url_results: explanation.extend(url_results[0]['reasons'][:3])
+        if not explanation: explanation.append('No strong pattern flags; classification is uncertain.')
+        explanation.append('Indicative AI assessment only: verify through an official channel; never share OTPs or passwords.')
+        return {'verdict':verdict,'risk_score':risk,'language_detected':language,
+            'text_risk_indicator':round(float(text_risk),1),
+            'safety_rule_floor':rule_floor,
+            'decision_thresholds':{'suspicious':SUSPICIOUS_THRESHOLD, 'scam':SCAM_THRESHOLD},
+            'url_risk_indicator':round(float(url_risk),1) if urls else None,
+            'url_model_status':'real_labeled_random_forest' if self.url_model is not None else 'heuristic_only_unvalidated',
+            'text_backend':self.text_backend,
+            'text_class_scores':{x:round(100*float(p),1) for x,p in probs.items()},
+            'urls':url_results,'explanation':explanation,'highlighted_terms':highlighted_terms(message),'model_evidence':[],
+            'disclaimer':'DEVELOPMENT MODEL. NOT a verified probability of fraud. Urdu and Suspicious examples rely heavily on synthetic data.'}
+
+_ANALYZER=None
+
+def analyze_message(message):
+    global _ANALYZER
+    if _ANALYZER is None: _ANALYZER=Analyzer()
+    return _ANALYZER.analyze(message)
