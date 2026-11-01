@@ -20,26 +20,31 @@
   document.addEventListener('click', e => {
     if (menu?.classList.contains('is-open') && !menu.contains(e.target) && !toggle?.contains(e.target)) closeMenu();
   });
-  // Typewriting is purely decorative. Keep a meaningful static phrase if JS or motion is disabled.
+  // Animate only the final word. Its dedicated line and reserved width prevent layout shifts.
   const word = document.getElementById('typewriter');
   if (word && !motionDisabled) {
-    const phrases = ['in seconds.', 'before you click.', 'with clarity.'];
+    const phrases = ['safely.', 'clearly.', 'quickly.', 'instantly.'];
     let index = 0;
-    function cycle() {
+    const update = (value) => { word.textContent = value; word.dataset.text = value; };
+    const after = (ms, fn) => window.setTimeout(fn, ms);
+    const glitch = (fn) => {
+      word.classList.add('is-glitch');
+      after(230, () => { word.classList.remove('is-glitch'); fn(); });
+    };
+    const cycle = () => glitch(() => {
+      let pos = phrases[index].length;
       const next = (index + 1) % phrases.length;
-      const from = phrases[index], to = phrases[next];
-      let i = from.length;
-      const erase = () => {
-        if (i > 0) { word.textContent = from.slice(0, --i); setTimeout(erase, 40); }
-        else { i = 0; setTimeout(type, 170); }
-      };
-      const type = () => {
-        if (i < to.length) { word.textContent = to.slice(0, ++i); setTimeout(type, 73); }
-        else { index = next; setTimeout(cycle, 3000); }
-      };
+      function erase() {
+        if (pos > 0) { update(phrases[index].slice(0, --pos)); after(37, erase); }
+        else { pos = 0; after(170, type); }
+      }
+      function type() {
+        if (pos < phrases[next].length) { update(phrases[next].slice(0, ++pos)); after(74, type); }
+        else { index = next; after(2500, cycle); }
+      }
       erase();
-    }
-    setTimeout(cycle, 3400);
+    });
+    after(2700, cycle);
   }
   const sections = Array.from(document.querySelectorAll('main section[id]'));
   if ('IntersectionObserver' in window) {
@@ -54,8 +59,8 @@
   if (motionDisabled || !window.gsap) return;
   const gsap = window.gsap;
   gsap.from('.hero-copy > *', {opacity:0, y:30, duration:.85, stagger:.105, ease:'power3.out', clearProps:'all'});
-  gsap.from('.hero-visual picture', {opacity:0, y:26, scale:.93, duration:1.2, delay:.2, ease:'power3.out', clearProps:'all'});
-  gsap.to('.hero-visual picture', {y:-12, duration:3.6, ease:'sine.inOut', yoyo:true, repeat:-1, delay:1.4});
+  gsap.from('.hero-visual .hero-art', {opacity:0, y:26, scale:.93, duration:1.2, delay:.2, ease:'power3.out', clearProps:'all'});
+  gsap.to('.hero-visual .hero-art', {y:-12, duration:3.6, ease:'sine.inOut', yoyo:true, repeat:-1, delay:1.4});
   if (!window.ScrollTrigger) return;
   gsap.registerPlugin(window.ScrollTrigger);
   document.querySelectorAll('[data-reveal]').forEach(el => {

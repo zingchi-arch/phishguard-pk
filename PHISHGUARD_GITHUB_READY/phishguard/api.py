@@ -61,6 +61,12 @@ def javascript():
                         headers={'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff'})
 
 
+@app.get('/pdf-report.js', include_in_schema=False)
+def pdf_report():
+    return FileResponse(WEB / 'pdf-report.js', media_type='text/javascript',
+                        headers={'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff'})
+
+
 @app.get('/motion.js', include_in_schema=False)
 def motion():
     return FileResponse(WEB / 'motion.js', media_type='text/javascript',

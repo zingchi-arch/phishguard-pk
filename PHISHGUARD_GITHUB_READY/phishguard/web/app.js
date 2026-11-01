@@ -28,6 +28,18 @@ $('#check').onclick=async()=>{hideError();const m=$('#message').value.trim();if(
 $('#message').addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='Enter')$('#check').click()});
 function save(name,content,type){const b=new Blob([content],{type}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000)}
 $('#export-json').onclick=()=>{if(last)save('phishguard_analysis.json',JSON.stringify(last,null,2),'application/json')};
+$('#export-pdf').onclick=async()=>{
+  if(!last)return;
+  const btn=$('#export-pdf');
+  btn.disabled=true;
+  const previous=btn.innerHTML;
+  btn.textContent='Preparing PDF...';
+  try {
+    if(!window.PhishGuardPDF)throw Error('PDF module unavailable. Please reload the page.');
+    await window.PhishGuardPDF.save({result:last,message:$('#message').value});
+  } catch(err) { showError('PDF export failed: '+err.message); }
+  finally {btn.disabled=false;btn.innerHTML=previous;}
+};
 function escapeCSV(s){let x=String(s??'');if(/^[\s]*[=+@-]/.test(x))x="'"+x;return '"'+x.replaceAll('"','""')+'"'}
 $('#sample-csv').onclick=()=>save('phishguard_sample_messages.csv','message\n'+Object.values(samples).map(escapeCSV).join('\n'),'text/csv');
 // RFC-4180-style CSV parser handles quoted commas, escaped quotes and line breaks.

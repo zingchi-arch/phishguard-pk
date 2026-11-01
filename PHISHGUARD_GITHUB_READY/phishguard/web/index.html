@@ -7,8 +7,7 @@
   <meta name="description" content="PhishGuard-PK screens suspicious SMS, WhatsApp, emails and links in English, Roman Urdu and Urdu. Free academic research tool with explainable results.">
   <title>PhishGuard-PK | Think before you click</title>
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
-  <link rel="preload" as="image" href="/assets/glass-shield-desktop.webp" media="(min-width:701px)">
-  <link rel="preload" as="image" href="/assets/glass-shield-mobile.webp" media="(max-width:700px)">
+  <link rel="preload" as="image" href="/assets/hero-background-square.webp">
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
@@ -44,12 +43,12 @@
     <section class="hero section-container" aria-labelledby="hero-title">
       <div class="hero-copy">
         <div class="kicker"><svg class="icon" aria-hidden="true"><use href="#i-spark"/></svg> AI SECURITY FOR EVERYONE</div>
-        <h1 id="hero-title">Detect phishing<br>messages <span class="hero-green typed-wrap"><span id="typewriter">in seconds.</span><span class="caret" aria-hidden="true"></span></span></h1>
+        <h1 id="hero-title"><span class="hero-heading-line">Detect phishing</span><span class="hero-heading-line">messages</span><span class="hero-heading-line hero-green"><span class="hero-typed-slot"><span id="typewriter" class="hero-typed-text" data-text="safely.">safely.</span><span class="caret" aria-hidden="true"></span></span></span></h1>
         <p>Screen suspicious SMS, WhatsApp, emails and links with multilingual AI. Built for English, Roman Urdu and Urdu.</p>
         <div class="hero-actions"><a class="btn btn-dark btn-large" href="#analyzer">Analyze a message <svg class="icon"><use href="#i-up-right"/></svg></a><a class="btn btn-light btn-large" href="#how-it-works"><svg class="icon play-icon"><use href="#i-play"/></svg> How it works</a></div>
         <div class="hero-proof" aria-label="Capabilities"><div><svg class="icon"><use href="#i-globe"/></svg><span><strong>3 languages</strong><small>English, Roman Urdu, Urdu</small></span></div><div><svg class="icon"><use href="#i-link"/></svg><span><strong>Text + URL</strong><small>Offline link inspection</small></span></div><div><svg class="icon"><use href="#i-lock"/></svg><span><strong>No signup</strong><small>Analyze directly</small></span></div></div>
       </div>
-      <div class="hero-visual" aria-label="Illustration of a secure shield with example detection labels"><div class="hero-glow" aria-hidden="true"></div><picture><source media="(max-width:700px)" srcset="/assets/glass-shield-mobile.webp"><img src="/assets/glass-shield-desktop.webp" width="562" height="386" alt="Illustration: translucent green protective shield with scam, link and safe-message indicators" fetchpriority="high" decoding="async"/></picture><span class="visual-orbit orbit-1" aria-hidden="true"></span><span class="visual-orbit orbit-2" aria-hidden="true"></span></div>
+      <div class="hero-visual" aria-label="Illustration of a green protective shield with example security statuses"><div class="hero-glow" aria-hidden="true"></div><picture class="hero-art"><img src="/assets/hero-background-square.webp" width="950" height="950" alt="Layered translucent green glass panels and a check-mark shield" fetchpriority="high" decoding="async"/></picture><div class="hero-float-status status-scam" aria-hidden="true"><span class="status-ico">!</span><span>Scam detected</span></div><div class="hero-float-status status-link" aria-hidden="true"><svg class="icon"><use href="#i-link"/></svg><span>Suspicious link</span></div><div class="hero-float-status status-safe" aria-hidden="true"><span class="status-ico">✓</span><span>Safe message</span></div><span class="visual-orbit orbit-1" aria-hidden="true"></span><span class="visual-orbit orbit-2" aria-hidden="true"></span></div>
     </section>
     <div class="wave" aria-hidden="true"></div>
     <section id="how-it-works" class="steps section-container" aria-labelledby="steps-title">
@@ -77,7 +76,7 @@
               <div class="result-summary"><div><div class="overline">YOUR ANALYSIS</div><div id="verdict" class="verdict"></div><div id="result-language" class="result-language"></div></div><div class="risk-panel"><div id="score" class="score"></div><div class="muted small">RISK INDICATOR / 100</div></div></div>
               <div class="meter"><div id="meter-fill"></div></div>
               <div class="result-columns"><div><h4>Why this result?</h4><ul id="reasons" class="reasons"></ul><h4>Flagged words</h4><div id="terms" class="term-list"></div></div><div><h4>Links inspected <span id="url-count"></span></h4><div id="urls"></div><div class="detail-block"><h4>Signals</h4><div id="signals"></div></div></div></div>
-              <div class="result-footer"><span>Risk indicators are not verified probabilities. A Safe result does not prove the message is genuine.</span><button id="export-json" class="secondary smallbutton">Export JSON <svg class="icon"><use href="#i-download"/></svg></button></div>
+              <div class="result-footer"><span>Risk indicators are not verified probabilities. A Safe result does not prove the message is genuine.</span><div class="report-actions"><button id="export-pdf" class="report-pdf-btn" type="button" aria-label="Download PDF analysis report"><svg class="icon"><use href="#i-download"/></svg> Download PDF report</button><button id="export-json" class="secondary smallbutton" type="button">Export JSON <svg class="icon"><use href="#i-download"/></svg></button></div></div>
             </div>
           </div>
           <div id="batch-panel" role="tabpanel" class="panel" hidden>
@@ -98,6 +97,6 @@
   <footer class="footer"><div class="container footer-inner"><a href="#home" class="brand footer-brand"><img src="/assets/phishguard-shield.svg" width="30" height="34" alt=""/><span>PhishGuard-PK</span></a><span>© 2026 PhishGuard-PK · Final Year Project</span><div class="footer-links"><a href="/health" target="_blank" rel="noopener">Health</a><a href="/model-status" target="_blank" rel="noopener">Model status</a><a href="/docs" target="_blank" rel="noopener">API Docs</a></div></div></footer>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrollTrigger.min.js" defer></script>
-  <script src="/app.js" defer></script><script src="/motion.js" defer></script>
+  <script src="/pdf-report.js" defer></script><script src="/app.js" defer></script><script src="/motion.js" defer></script>
 </body>
 </html>
