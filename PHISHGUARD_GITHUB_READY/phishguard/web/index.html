@@ -7,7 +7,8 @@
   <meta name="description" content="PhishGuard-PK screens suspicious SMS, WhatsApp, emails and links in English, Roman Urdu and Urdu. Free academic research tool with explainable results.">
   <title>PhishGuard-PK | Think before you click</title>
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
-  <link rel="preload" as="image" href="/assets/hero-background-square.webp">
+  <link rel="preload" as="image" href="/assets/hero-static-desktop.webp" media="(min-width: 761px)">
+  <link rel="preload" as="image" href="/assets/hero-static-mobile.webp" media="(max-width: 760px)">
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
@@ -43,12 +44,11 @@
     <section class="hero section-container" aria-labelledby="hero-title">
       <div class="hero-copy">
         <div class="kicker"><svg class="icon" aria-hidden="true"><use href="#i-spark"/></svg> AI SECURITY FOR EVERYONE</div>
-        <h1 id="hero-title"><span class="hero-heading-line">Detect phishing</span><span class="hero-heading-line">messages</span><span class="hero-heading-line hero-green"><span class="hero-typed-slot"><span id="typewriter" class="hero-typed-text" data-text="safely.">safely.</span><span class="caret" aria-hidden="true"></span></span></span></h1>
-        <p>Screen suspicious SMS, WhatsApp, emails and links with multilingual AI. Built for English, Roman Urdu and Urdu.</p>
+        <h1 id="hero-title">Detect phishing<br>messages <span class="hero-green">before you click.</span></h1>
+        <p>Screen suspicious SMS, WhatsApp messages, emails and links in English, Roman Urdu and Urdu. Understand the warning signs before you respond.</p>
         <div class="hero-actions"><a class="btn btn-dark btn-large" href="#analyzer">Analyze a message <svg class="icon"><use href="#i-up-right"/></svg></a><a class="btn btn-light btn-large" href="#how-it-works"><svg class="icon play-icon"><use href="#i-play"/></svg> How it works</a></div>
-        <div class="hero-proof" aria-label="Capabilities"><div><svg class="icon"><use href="#i-globe"/></svg><span><strong>3 languages</strong><small>English, Roman Urdu, Urdu</small></span></div><div><svg class="icon"><use href="#i-link"/></svg><span><strong>Text + URL</strong><small>Offline link inspection</small></span></div><div><svg class="icon"><use href="#i-lock"/></svg><span><strong>No signup</strong><small>Analyze directly</small></span></div></div>
+        <div class="hero-proof" aria-label="PhishGuard capabilities"><div><svg class="icon"><use href="#i-globe"/></svg><span><strong>3 languages</strong><small>English, Roman Urdu, Urdu</small></span></div><div><svg class="icon"><use href="#i-link"/></svg><span><strong>Text + links</strong><small>Offline URL checks</small></span></div><div><svg class="icon"><use href="#i-lock"/></svg><span><strong>No signup</strong><small>Free to access</small></span></div></div>
       </div>
-      <div class="hero-visual" aria-label="Illustration of a green protective shield with example security statuses"><div class="hero-glow" aria-hidden="true"></div><picture class="hero-art"><img src="/assets/hero-background-square.webp" width="950" height="950" alt="Layered translucent green glass panels and a check-mark shield" fetchpriority="high" decoding="async"/></picture><div class="hero-float-status status-scam" aria-hidden="true"><span class="status-ico">!</span><span>Scam detected</span></div><div class="hero-float-status status-link" aria-hidden="true"><svg class="icon"><use href="#i-link"/></svg><span>Suspicious link</span></div><div class="hero-float-status status-safe" aria-hidden="true"><span class="status-ico">✓</span><span>Safe message</span></div><span class="visual-orbit orbit-1" aria-hidden="true"></span><span class="visual-orbit orbit-2" aria-hidden="true"></span></div>
     </section>
     <div class="wave" aria-hidden="true"></div>
     <section id="how-it-works" class="steps section-container" aria-labelledby="steps-title">
@@ -95,8 +95,6 @@
     <section class="research-note section-container" aria-label="Research limitations"><div class="research-inner"><div><div class="section-kicker">RESPONSIBLE BY DESIGN</div><h3>Stay skeptical. Stay safer.</h3><p>This is a research-stage classifier, not a verified fraud-detection authority. A Safe result cannot guarantee a message is genuine. Don't share passwords or OTPs; verify payment and account requests through official channels.</p></div><a class="btn btn-outline" href="/model-status" target="_blank" rel="noopener noreferrer">Model status <svg class="icon"><use href="#i-up-right"/></svg></a></div></section>
   </main>
   <footer class="footer"><div class="container footer-inner"><a href="#home" class="brand footer-brand"><img src="/assets/phishguard-shield.svg" width="30" height="34" alt=""/><span>PhishGuard-PK</span></a><span>© 2026 PhishGuard-PK · Final Year Project</span><div class="footer-links"><a href="/health" target="_blank" rel="noopener">Health</a><a href="/model-status" target="_blank" rel="noopener">Model status</a><a href="/docs" target="_blank" rel="noopener">API Docs</a></div></div></footer>
-  <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrollTrigger.min.js" defer></script>
   <script src="/pdf-report.js" defer></script><script src="/app.js" defer></script><script src="/motion.js" defer></script>
 </body>
 </html>
