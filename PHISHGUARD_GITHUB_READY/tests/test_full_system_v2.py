@@ -7,7 +7,7 @@ client=TestClient(app)
 def test_home_website_and_files():
     r=client.get('/')
     assert r.status_code==200
-    for phrase in ('Know the risk.', 'English', 'Roman Urdu','اردو','Batch CSV'):
+    for phrase in ('Detect phishing', 'English', 'Roman Urdu','اردو','Batch CSV'):
         assert phrase in r.text
     assert client.get('/styles.css').status_code==200
     js=client.get('/app.js')

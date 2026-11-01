@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import List
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field, field_validator
 from .inference import analyze_message
 
@@ -16,6 +17,9 @@ app = FastAPI(
     description='Multilingual message + offline URL risk screening. Risk indicators are uncalibrated.',
 )
 
+
+# Browser-ready art assets; static files also qualify for Vercel CDN caching.
+app.mount("/assets", StaticFiles(directory=WEB / "assets"), name="assets")
 
 class MessageRequest(BaseModel):
     message: str = Field(min_length=1, max_length=10000)
@@ -55,6 +59,12 @@ def styles():
 def javascript():
     return FileResponse(WEB / 'app.js', media_type='text/javascript',
                         headers={'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff'})
+
+
+@app.get('/motion.js', include_in_schema=False)
+def motion():
+    return FileResponse(WEB / 'motion.js', media_type='text/javascript',
+                        headers={'Cache-Control': 'public, max-age=300', 'X-Content-Type-Options': 'nosniff'})
 
 
 @app.get('/health')
