@@ -5,18 +5,20 @@ from phishguard.api import app
 client = TestClient(app)
 WEB = Path(__file__).resolve().parents[1] / 'phishguard' / 'web'
 
-def test_hero_is_single_static_section():
+def test_hero_has_same_layered_background_on_mobile_and_desktop():
     html = (WEB / 'index.html').read_text()
     css = (WEB / 'styles.css').read_text()
     js = (WEB / 'motion.js').read_text()
     assert 'before you click.' in html
-    assert 'id="typewriter"' not in html
     assert 'hero-visual' not in html
-    assert 'gsap@' not in html
-    assert 'hero-static-desktop.webp' in css
-    assert 'hero-static-mobile.webp' in css
-    assert 'animation:none!important' in css
-    assert 'setTimeout(' not in js
+    assert 'id="typewriter"' not in html
+    assert "shield-original-square.webp" in css
+    assert "shield-original-wide.webp" in css
+    assert "background-size:cover" in css
+    assert "window.matchMedia('(prefers-reduced-motion: reduce)')" in js
+    assert 'gsap@' in html
+    assert 'ScrollTrigger' in js
+
 
 def test_pdf_route_and_button():
     html = client.get('/').text
