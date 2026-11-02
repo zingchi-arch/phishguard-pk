@@ -1,0 +1,19 @@
+{
+  "research_gate": "FAIL",
+  "production_approved": false,
+  "provider_phish_warning_rate": 1.0,
+  "tranco_homepage_proxy_warning_rate": 1.0,
+  "uci_holdout_accuracy": 0.9961,
+  "blockers": [
+    "Proxy benign warnings 100.0% exceed 5% diagnostic bound.",
+    "Reference legitimate URLs yield more than one warning out of 30.",
+    "NO independently adjudicated, leakage-free real-world external URLs with calibrated operating threshold."
+  ],
+  "limitations": [
+    "Tranco popularity is not legitimacy certification",
+    "OpenPhish provider labels are not independent manual review",
+    "Historical UCI test accuracy is not current external accuracy",
+    "Model scores are not calibrated probabilities",
+    "No user-submitted URL is opened by this script"
+  ]
+}

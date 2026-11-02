@@ -1,0 +1,180 @@
+{
+  "experiment": "STEP50_UCI_2024_TRAIN_FRESH_FEEDS_SEPARATE_RESEARCH",
+  "data": {
+    "input_rows": 10000,
+    "usable_after_dedup": 9999,
+    "conflicting_url_values_removed": 0,
+    "grouping_quality": "libpsl_registrable_domain",
+    "excluded_external_or_reference_groups_rows": 114
+  },
+  "labels": "UCI source: 1 legitimate, 0 phishing; internal: 1 phishing, 0 legitimate",
+  "split_rows": {
+    "train": 6906,
+    "validation": 1447,
+    "test": 1532
+  },
+  "split_registered_domain_overlap": 0,
+  "external_group_overlap_with_training": 0,
+  "model_candidates_validation": [
+    {
+      "name": "char_tfidf_linear",
+      "threshold": 0.25,
+      "val": {
+        "n": 1447,
+        "accuracy": 0.9965,
+        "precision_macro": 0.9967,
+        "recall_macro": 0.9964,
+        "f1_macro": 0.9965,
+        "phishing_recall": 0.9927,
+        "false_positive_rate": 0.0,
+        "confusion_matrix_labels_0_benign_1_phishing": [
+          [
+            758,
+            0
+          ],
+          [
+            5,
+            684
+          ]
+        ]
+      },
+      "threshold_selection": {
+        "reason": "Validation-only macro F1 under FPR<=5% constraint",
+        "constraints_met": true,
+        "selected_validation": {
+          "n": 1447,
+          "accuracy": 0.9965,
+          "precision_macro": 0.9967,
+          "recall_macro": 0.9964,
+          "f1_macro": 0.9965,
+          "phishing_recall": 0.9927,
+          "false_positive_rate": 0.0,
+          "confusion_matrix_labels_0_benign_1_phishing": [
+            [
+              758,
+              0
+            ],
+            [
+              5,
+              684
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "name": "lexical_random_forest",
+      "threshold": 0.4,
+      "val": {
+        "n": 1447,
+        "accuracy": 0.9979,
+        "precision_macro": 0.998,
+        "recall_macro": 0.9978,
+        "f1_macro": 0.9979,
+        "phishing_recall": 0.9956,
+        "false_positive_rate": 0.0,
+        "confusion_matrix_labels_0_benign_1_phishing": [
+          [
+            758,
+            0
+          ],
+          [
+            3,
+            686
+          ]
+        ]
+      },
+      "threshold_selection": {
+        "reason": "Validation-only macro F1 under FPR<=5% constraint",
+        "constraints_met": true,
+        "selected_validation": {
+          "n": 1447,
+          "accuracy": 0.9979,
+          "precision_macro": 0.998,
+          "recall_macro": 0.9978,
+          "f1_macro": 0.9979,
+          "phishing_recall": 0.9956,
+          "false_positive_rate": 0.0,
+          "confusion_matrix_labels_0_benign_1_phishing": [
+            [
+              758,
+              0
+            ],
+            [
+              3,
+              686
+            ]
+          ]
+        }
+      }
+    }
+  ],
+  "winner": "lexical_random_forest",
+  "threshold_selected_on_validation": 0.4,
+  "uci_heldout_source_label_metrics": {
+    "n": 1532,
+    "accuracy": 0.9961,
+    "precision_macro": 0.996,
+    "recall_macro": 0.9961,
+    "f1_macro": 0.9961,
+    "phishing_recall": 0.995,
+    "false_positive_rate": 0.0027,
+    "confusion_matrix_labels_0_benign_1_phishing": [
+      [
+        735,
+        2
+      ],
+      [
+        4,
+        791
+      ]
+    ]
+  },
+  "external_source_diagnostics": {
+    "openphish_provider_label": {
+      "n": 245,
+      "warnings_n": 245,
+      "warnings_fraction": 1.0,
+      "mean_uncalibrated_score": 0.9944,
+      "status": "SOURCE_LABELLED_NOT_INDEPENDENTLY_VERIFIED",
+      "baseline_structural_45_warnings_n": 1
+    },
+    "tranco_homepage_proxy": {
+      "n": 400,
+      "warnings_n": 400,
+      "warnings_fraction": 1.0,
+      "mean_uncalibrated_score": 0.9966,
+      "status": "POPULAR_HOMEPAGE_PROXY_NOT_VERIFIED_SAFE",
+      "baseline_structural_45_warnings_n": 0
+    }
+  },
+  "legacy_30_reference_urls_warning_count": 10,
+  "diagnostic_gate_pass": false,
+  "deployment_approved": false,
+  "deployment_note": "NO DEPLOYMENT. Diagnostic gate alone is insufficient. Needs independent real-world and Pakistani URL validation.",
+  "safety": "Only URL strings classified; no candidate URLs opened, resolved, or requested.",
+  "risks": [
+    "UCI 2024 aged data and possible template/source artifacts",
+    "Provider-labelled OpenPhish feed not individually verified",
+    "Tranco popular domains are NOT authenticated legitimate URLs",
+    "Homepage proxies omit legitimate deep links",
+    "Scores are NOT calibrated probabilities or guarantees of safety"
+  ],
+  "publisher_errors": {},
+  "publisher_evidence": {
+    "openphish": {
+      "source": "https://raw.githubusercontent.com/openphish/public_feed/refs/heads/main/feed.txt",
+      "raw_unique_urls": 300,
+      "selected_distinct_hosts": 245,
+      "source_sha256": "2b3f1011ad42a3c55cb3a37623325c0a81b5cadc189971308dba40ed7303c128"
+    },
+    "tranco": {
+      "source": "https://tranco-list.eu/download_daily/V354N",
+      "list_id": "V354N",
+      "raw_domains": 1000000,
+      "selected_distinct_hosts": 400,
+      "source_sha256": "ee6d59f936fb1c0bcf287edffc73847759e9ef0e627330b893cb589ff939497c"
+    }
+  },
+  "runtime_utc": "2026-11-02T16:02:06.930983+00:00"
+}
