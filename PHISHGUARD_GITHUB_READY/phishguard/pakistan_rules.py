@@ -29,6 +29,10 @@ CHALLAN = rx(r'\b(?:e[ -]?challan|psca|traffic\s*(?:fine|challan)|e[ -]?ticket)\
 GOV_THREAT = rx(r'\b(?:fia|cyber\s*crime|police|court|nadra)\b|ایف\s*آئی\s*اے|عدالت|پولیس|نادرا')
 ARREST = rx(r'\b(?:arrest|giraftar|giraftari|warrant|lawsuit|case\s*registered)\b|گرفتار|وارنٹ|مقدمہ')
 PERSONAL_GREETING = rx(r'\b(?:eid|jummah|ramadan|birthday|wedding|anniversary|new\s*year)\b|عید|رمضان|جمعہ|سالگرہ|شادی')
+SECURITY_WARNING = rx(r'\b(?:do\s*not\s*share|don.t\s*share|never\s*share|beware\s+of\s+(?:scam|fraud)|scam\s+alert|fake\s+(?:message|link)|fraud\s+awareness|kabhi\s+(?:share|bata)\s+na|kisi\s+ko\s+na\s+batayein)\b|جعلی\s*پیغام|کسی\s*کو\s*نہ\s*بتائیں|ہرگز\s*شیئر\s*نہ|او\s*ٹی\s*پی\s*کسی\s*کو\s*نہ')
+JOB_VISA = rx(r'\b(?:job|visa|work\s*permit|appointment\s*letter|naukri|nokri|sarkari\s*job|vacancy|recruitment)\b|نوکری|ملازمت|ویزا|جاب')
+ADVANCE_FEE = rx(r'\b(?:processing\s*fee|registration\s*fee|advance\s*fee|security\s*deposit)\b|رجسٹریشن\s*فیس|پروسیسنگ\s*فیس|پیشگی\s*رقم')
+PAY_TO_WALLET = rx(r'\b(?:jazzcash|easypaisa|sadapay|nayapay|wallet|private\s*account)\b|جاز\s*کیش|ایزی\s*پیسہ|ذاتی\s*اکاؤنٹ')
 
 
 @dataclass(frozen=True)
@@ -50,7 +54,9 @@ def assess_pakistani_context(message: str, sender_id: str | None = None, claimed
     has_secret_request = any(SECRET.search(c) and ASK_SECRET.search(c) and not NEGATION.search(c) for c in clauses)
     # Negation is a safeguard only for secret-sharing advice, NOT a blanket
     # exemption for a different prize claim appearing in the same message.
-    protect_secret_advice = bool(NEGATION.search(text))
+    # Generic words such as 'avoid' (e.g. 'pay to avoid arrest') are
+    # NOT a security warning.  Use an explicit advice phrase instead.
+    protect_secret_advice = bool(SECURITY_WARNING.search(text))
 
     if BISP.search(context) and CLAIM.search(text) and (has_contact or has_link or asks_money):
         flags.append(Indicator(88, 'BISP benefit claim with external contact, link, or payment instruction. Check independently through official 8171 channels.', 'PK_BISP_REDIRECT'))
@@ -74,6 +80,11 @@ def assess_pakistani_context(message: str, sender_id: str | None = None, claimed
 
     if GOV_THREAT.search(context) and ARREST.search(text) and (has_link or asks_money) and not protect_secret_advice:
         flags.append(Indicator(89, 'Government or police arrest threat with payment or link request.', 'PK_GOV_THREAT_PAY'))
+
+    # A paid official application may exist; flag high risk only where a
+    # job/visa promise redirects advance fees to a consumer wallet.
+    if JOB_VISA.search(context) and ADVANCE_FEE.search(text) and PAY_TO_WALLET.search(text) and asks_money and not protect_secret_advice:
+        flags.append(Indicator(83, 'Job or visa approval claim requests a processing fee through a personal/payment-wallet channel. Verify using the official portal.', 'PK_JOB_VISA_WALLET_FEE'))
 
     return sorted(flags, key=lambda x: (-x.floor, x.rule_id))
 

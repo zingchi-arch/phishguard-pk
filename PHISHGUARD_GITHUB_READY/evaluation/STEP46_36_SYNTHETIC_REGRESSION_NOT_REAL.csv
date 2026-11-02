@@ -1,0 +1,37 @@
+﻿qa_id,language,scenario,category,message,expected_behavior,source_type,is_real_sms,eligible_for_external_accuracy
+QA-001,English,BISP false benefits,BISP,BISP approved your Rs 50000 payment. WhatsApp [PHONE_REMOVED] to receive it.,Scam,HAND_AUTHORED_SYNTHETIC_QA,NO,NO
+QA-002,English,Jeeto Pakistan prize,Jeeto,Jeeto Pakistan selected you for a gold prize. Contact us on WhatsApp [PHONE_REMOVED].,Scam,HAND_AUTHORED_SYNTHETIC_QA,NO,NO
+QA-003,English,Bank OTP request,Bank,HBL security team: share your OTP to prevent your account being blocked.,Scam,HAND_AUTHORED_SYNTHETIC_QA,NO,NO
+QA-004,English,Bank anti-OTP warning,Advice,HBL security reminder: never share your OTP or password with anybody.,NotScam,HAND_AUTHORED_SYNTHETIC_QA,NO,NO
+QA-005,English,Safe Eid greeting,Greeting,Eid Mubarak to you and your family!,NotScam,HAND_AUTHORED_SYNTHETIC_QA,NO,NO
+QA-006,English,Safe scheduling,Personal,"Hello, our meeting has moved to 4pm tomorrow.",NotScam,HAND_AUTHORED_SYNTHETIC_QA,NO,NO
+QA-007,English,Fake e-challan link,Challan,Your PSCA e-challan is overdue. Pay now https://psca.gov.pk.evil.invalid/fine,Scam,HAND_AUTHORED_SYNTHETIC_QA,NO,NO
+QA-008,English,Legit-known hosting URL,URL,https://www.wikipedia.org/wiki/Computer_security,NotScam,HAND_AUTHORED_SYNTHETIC_QA,NO,NO
+QA-009,English,Fake brand subdomain,URL,https://github.com.evil.invalid/login,Scam,HAND_AUTHORED_SYNTHETIC_QA,NO,NO
+QA-010,English,Government threat,Authority,FIA case registered. Pay Rs 25000 today to avoid arrest: https://fia.gov.pk.evil.invalid,Scam,HAND_AUTHORED_SYNTHETIC_QA,NO,NO
+QA-011,English,Routine utility notice,Utility,Your electricity bill is ready. Pay using your bank app.,NotScam,HAND_AUTHORED_SYNTHETIC_QA,NO,NO
+QA-012,English,Ordinary account OTP notification,OTP,Your login OTP is 452901. Do not share this code with anybody.,NotScam,HAND_AUTHORED_SYNTHETIC_QA,NO,NO
+QA-013,Roman Urdu,BISP false benefits,BISP,"BISP ki taraf se aapko 50000 rupay mubarak, WhatsApp [PHONE_REMOVED] par rabta karein.",Scam,HAND_AUTHORED_SYNTHETIC_QA,NO,NO
+QA-014,Roman Urdu,Jeeto gold fraud,Jeeto,"Jeeto Pakistan mein apka gold inaam nikla hai, is number par rabta karein [PHONE_REMOVED].",Scam,HAND_AUTHORED_SYNTHETIC_QA,NO,NO
+QA-015,Roman Urdu,Bank OTP demand,Bank,HBL bank se bat kar raha hun apna OTP foran bhejein.,Scam,HAND_AUTHORED_SYNTHETIC_QA,NO,NO
+QA-016,Roman Urdu,OTP safety advice,Advice,Bank ka paigham: OTP aur PIN kisi ko kabhi share na karein.,NotScam,HAND_AUTHORED_SYNTHETIC_QA,NO,NO
+QA-017,Roman Urdu,Eid greeting,Greeting,Eid Mubarak aap aur aap ki family ko. Khush raho.,NotScam,HAND_AUTHORED_SYNTHETIC_QA,NO,NO
+QA-018,Roman Urdu,Meeting note,Personal,Kal hamari meeting 3 baje hai. Time par pohanchna.,NotScam,HAND_AUTHORED_SYNTHETIC_QA,NO,NO
+QA-019,Roman Urdu,Fake challan link,Challan,"Apka e challan pending hai, abhi payment karein https://echallan.gov.pk.fake.invalid",Scam,HAND_AUTHORED_SYNTHETIC_QA,NO,NO
+QA-020,Roman Urdu,Official URL,URL,https://www.python.org/doc/,NotScam,HAND_AUTHORED_SYNTHETIC_QA,NO,NO
+QA-021,Roman Urdu,Fake bank domain,URL,https://hbl.com.pk.evil.invalid/account,Scam,HAND_AUTHORED_SYNTHETIC_QA,NO,NO
+QA-022,Roman Urdu,Job scam,Employment,Sarkari job approve ho gai hai. Processing fee Rs 8000 JazzCash par bhejo.,Scam,HAND_AUTHORED_SYNTHETIC_QA,NO,NO
+QA-023,Roman Urdu,Generic delivery update,Delivery,Aapka parcel dispatch ho gaya. Kal delivery ho gi.,NotScam,HAND_AUTHORED_SYNTHETIC_QA,NO,NO
+QA-024,Roman Urdu,Personal greeting,Greeting,Jummah Mubarak. Allah apko khush rakhe.,NotScam,HAND_AUTHORED_SYNTHETIC_QA,NO,NO
+QA-025,Urdu,BISP benefits link,BISP,بی آئی ایس پی کی طرف سے ۵۰۰۰۰ روپے منظور ہوئے، واٹس ایپ پر رابطہ کریں [PHONE_REMOVED],Scam,HAND_AUTHORED_SYNTHETIC_QA,NO,NO
+QA-026,Urdu,Jeeto prize,Jeeto,جیتو پاکستان میں آپ کا سونے کا انعام نکلا ہے، اس نمبر پر رابطہ کریں [PHONE_REMOVED],Scam,HAND_AUTHORED_SYNTHETIC_QA,NO,NO
+QA-027,Urdu,Urdu OTP request,Bank,بینک کا پیغام: اپنا او ٹی پی ابھی بھیجیں تاکہ اکاؤنٹ بند نہ ہو۔,Scam,HAND_AUTHORED_SYNTHETIC_QA,NO,NO
+QA-028,Urdu,Urdu OTP safety advice,Advice,بینک کی ہدایت: اپنا او ٹی پی کسی کو نہ بتائیں۔,NotScam,HAND_AUTHORED_SYNTHETIC_QA,NO,NO
+QA-029,Urdu,Urdu Eid greeting,Greeting,آپ کو اور آپ کے گھر والوں کو عید مبارک۔,NotScam,HAND_AUTHORED_SYNTHETIC_QA,NO,NO
+QA-030,Urdu,Urdu routine greeting,Personal,السلام علیکم، آج شام ملاقات ہو گی۔,NotScam,HAND_AUTHORED_SYNTHETIC_QA,NO,NO
+QA-031,Urdu,Urdu challan link,Challan,آپ کا ای چالان باقی ہے، فوراً ادائیگی کریں https://psca.gov.pk.evil.invalid,Scam,HAND_AUTHORED_SYNTHETIC_QA,NO,NO
+QA-032,Urdu,Urdu fake URL,URL,https://bisp.gov.pk.evil.invalid/claim,Scam,HAND_AUTHORED_SYNTHETIC_QA,NO,NO
+QA-033,Urdu,Urdu official reference,URL,https://www.wikipedia.org,NotScam,HAND_AUTHORED_SYNTHETIC_QA,NO,NO
+QA-034,Urdu,Urdu FIA threat,Authority,ایف آئی اے نے آپ کے خلاف مقدمہ درج کیا ہے، گرفتار ہونے سے بچنے کے لیے رقم جمع کریں۔,Scam,HAND_AUTHORED_SYNTHETIC_QA,NO,NO
+QA-035,Urdu,Urdu shipment message,Delivery,آپ کا پارسل کل پہنچ جائے گا۔,NotScam,HAND_AUTHORED_SYNTHETIC_QA,NO,NO
+QA-036,Urdu,Urdu medical appointment,Personal,آپ کی ڈاکٹر سے ملاقات کل صبح دس بجے ہے۔,NotScam,HAND_AUTHORED_SYNTHETIC_QA,NO,NO
