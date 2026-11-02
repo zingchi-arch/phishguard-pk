@@ -7,9 +7,9 @@ from pathlib import Path
 from typing import List
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
-from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field, field_validator
-from .inference import analyze_message
+from .inference import analyze_message, get_analyzer
+from .attributions import explain_text_deletions, MAX_MESSAGE_CHARS
 
 WEB = Path(__file__).resolve().parent / 'web'
 app = FastAPI(
@@ -18,11 +18,10 @@ app = FastAPI(
 )
 
 
-# Browser-ready art assets; static files also qualify for Vercel CDN caching.
-app.mount("/assets", StaticFiles(directory=WEB / "assets"), name="assets")
-
 class MessageRequest(BaseModel):
     message: str = Field(min_length=1, max_length=10000)
+    sender_id: str | None = Field(default=None, max_length=80, description="Optional sender label or number; never authenticated")
+    claimed_org: str | None = Field(default=None, max_length=80, description="Optional organization claimed by the message; never authenticated")
 
     @field_validator('message')
     @classmethod
@@ -61,18 +60,6 @@ def javascript():
                         headers={'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff'})
 
 
-@app.get('/pdf-report.js', include_in_schema=False)
-def pdf_report():
-    return FileResponse(WEB / 'pdf-report.js', media_type='text/javascript',
-                        headers={'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff'})
-
-
-@app.get('/motion.js', include_in_schema=False)
-def motion():
-    return FileResponse(WEB / 'motion.js', media_type='text/javascript',
-                        headers={'Cache-Control': 'public, max-age=300', 'X-Content-Type-Options': 'nosniff'})
-
-
 @app.get('/health')
 def health():
     return {'status':'ok', 'project':'PhishGuard-PK', 'version':'2.0.0',
@@ -89,6 +76,8 @@ def model_status():
         'url_classifier_type':'Real-labeled RF' if (root/'url_model_real.joblib').exists() else 'Offline heuristic (not independently validated)',
         'advanced_transformer_trained':(root/'xlmr_development'/'config.json').exists(),
         'training_status':'provisional_labels_not_verified',
+        'explainability_live':'opt_in_local_token_deletion_NOT_SHAP_OR_LIME',
+        'explainability_research':'SHAP_and_LIME_offline_only_when_optional_dependencies_installed',
         'disclaimer':'Risk indicators, not calibrated fraud probabilities.'
     }
 
@@ -96,7 +85,7 @@ def model_status():
 @app.post('/analyze')
 def analyze(payload: MessageRequest):
     try:
-        return analyze_message(payload.message)
+        return analyze_message(payload.message,sender_id=payload.sender_id,claimed_org=payload.claimed_org)
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     except RuntimeError as exc:
@@ -114,3 +103,28 @@ def analyze_batch(payload: BatchRequest):
             rows.append({'row':i, 'message':message, 'error':str(exc)})
     return {'count':len(rows), 'results':rows,
             'note':'Never treat these results as verified phishing determinations.'}
+
+
+@app.post('/analyze/explain')
+def explain_analysis(payload: MessageRequest):
+    """Opt-in, bounded diagnostic for text classifier only; not SHAP/LIME.
+
+    Kept separate from the fast regular/batch analyzer to avoid expensive
+    inference on every user request. Links are NEVER fetched.
+    """
+    if len(payload.message) > MAX_MESSAGE_CHARS:
+        raise HTTPException(status_code=422, detail=f'Explanation supports up to {MAX_MESSAGE_CHARS} characters')
+    try:
+        result = analyze_message(payload.message, sender_id=payload.sender_id, claimed_org=payload.claimed_org)
+        if result['url_only_input']:
+            result['model_attribution'] = {
+                'status': 'not_applicable_to_url_only',
+                'reason': 'A URL-only verdict uses structural URL policy, not the text classifier.'
+            }
+        else:
+            result['model_attribution'] = explain_text_deletions(get_analyzer().text_model, payload.message)
+        return result
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc

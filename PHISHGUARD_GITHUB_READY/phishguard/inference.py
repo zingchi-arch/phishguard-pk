@@ -120,7 +120,10 @@ class Analyzer:
 
 _ANALYZER=None
 
-def analyze_message(message, sender_id=None, claimed_org=None):
+def get_analyzer():
     global _ANALYZER
     if _ANALYZER is None: _ANALYZER=Analyzer()
-    return _ANALYZER.analyze(message,sender_id=sender_id,claimed_org=claimed_org)
+    return _ANALYZER
+
+def analyze_message(message, sender_id=None, claimed_org=None):
+    return get_analyzer().analyze(message,sender_id=sender_id,claimed_org=claimed_org)
