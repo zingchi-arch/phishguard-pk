@@ -7,6 +7,7 @@ from .preprocessing import detect_language
 from .urls import extract_urls, feature_vector, heuristic_url_risk, url_reasons, url_features
 from .explain import evidence_patterns, highlighted_terms, model_top_tokens, critical_rule_risk
 from .pakistan_rules import assess_pakistani_context, looks_like_plain_greeting
+from .url_policy import assess_url
 
 MODEL_DIR = Path(__file__).resolve().parents[1] / 'models'
 LABELS = ['Safe','Suspicious','Scam']
@@ -47,22 +48,38 @@ class Analyzer:
         text_risk=100*(probs['Scam']+0.5*probs['Suspicious'])
         urls=extract_urls(message)
         url_results=[]
+        url_rule_floor = 0.0
         for u in urls[:10]:
-            heuristic=heuristic_url_risk(u)
-            rf_score=None
+            # A high-scoring research RF is NOT allowed to overrule the URL policy:
+            # previous host-separated testing showed 8-10/30 false alarms on
+            # ordinary websites. Keep RF score diagnostic only if present.
+            structural = assess_url(u)
+            rf_score = None
             if self.url_model is not None:
-                try:rf_score=100*float(self.url_model.predict_proba([feature_vector(u)])[0][1])
-                except Exception:pass
-            # Model contribution is enabled ONLY if trained on independently labeled real URLs.
-            # Both indicators remain uncalibrated and do not imply that a URL is verified safe.
-            effective=max(heuristic, rf_score if rf_score is not None else 0)
-            url_results.append({'url':u,'risk_indicator':round(effective,1),
-                'heuristic_indicator':round(heuristic,1),
+                try:
+                    rf_score = 100 * float(self.url_model.predict_proba([feature_vector(u)])[0][1])
+                except (ValueError, IndexError, AttributeError):
+                    pass
+            indicator = structural.indicator
+            if indicator >= 75 and structural.high_confidence_structure:
+                url_rule_floor = max(url_rule_floor, 80.0)
+            elif indicator >= 45:
+                url_rule_floor = max(url_rule_floor, 45.0)
+            url_results.append({'url':u, 'risk_indicator':float(indicator),
+                'heuristic_indicator':round(heuristic_url_risk(u), 1),
                 'real_data_rf_indicator':round(rf_score,1) if rf_score is not None else None,
-                'features':url_features(u), 'reasons':url_reasons(u)})
+                'url_structural_status':structural.status,
+                'hostname_not_authenticated':structural.hostname,
+                'features':url_features(u), 'reasons':list(structural.reasons)})
         url_risk=max((r['risk_indicator'] for r in url_results),default=0)
-        # Both signals contribute when URLs exist. No URL => text only.
-        risk=0.7*text_risk+0.3*url_risk if urls else text_risk
+        # For a standalone URL input, ignore weak text-model artifacts on URL
+        # characters. A low score still does NOT mean the site is authenticated.
+        url_only = len(urls) == 1 and message.strip().rstrip('.,!?') == urls[0]
+        if url_only:
+            risk = float(url_risk)
+        else:
+            risk = 0.7 * text_risk + 0.3 * url_risk if urls else text_risk
+        risk = max(risk, url_rule_floor)
         rule_floor,rule_reason=critical_rule_risk(message)
         pk_indicators=assess_pakistani_context(message,sender_id=sender_id,claimed_org=claimed_org)
         pk_floor=max((p.floor for p in pk_indicators),default=0.0)
@@ -93,11 +110,13 @@ class Analyzer:
             'personal_greeting_guard_applied':greeting_guard,
             'decision_thresholds':{'suspicious':SUSPICIOUS_THRESHOLD, 'scam':SCAM_THRESHOLD},
             'url_risk_indicator':round(float(url_risk),1) if urls else None,
-            'url_model_status':'real_labeled_random_forest' if self.url_model is not None else 'heuristic_only_unvalidated',
+            'url_model_status':'research_rf_diagnostic_not_in_decision' if self.url_model is not None else 'offline_structural_rules_unvalidated',
+            'url_structural_rule_floor':url_rule_floor,
+            'url_only_input':url_only,
             'text_backend':self.text_backend,
             'text_class_scores':{x:round(100*float(p),1) for x,p in probs.items()},
             'urls':url_results,'explanation':explanation,'highlighted_terms':highlighted_terms(message),'model_evidence':[],
-            'disclaimer':'DEVELOPMENT MODEL. NOT a verified probability of fraud. Urdu and Suspicious examples rely heavily on synthetic data.'}
+            'disclaimer':'DEVELOPMENT SCREENING ONLY. No link is opened or verified. Indicators are not probabilities of phishing; source labels and Urdu samples remain insufficient for real-world accuracy claims.'}
 
 _ANALYZER=None
 

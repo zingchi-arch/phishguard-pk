@@ -1,0 +1,11 @@
+﻿PDF_requirement,module,completion_status,evidence,next_validation_needed
+1,Dataset 3000-5000 3-class,BLOCKED,"11,313 candidates, zero independently validated","Individual source labels, authentic evidence, rights, Urdu coverage"
+2,Text preprocessing NLP,WORKING_PROVISIONAL,"Multilingual normalize, stopwords, TF-IDF tests",Linguistic verification and representative Urdu examples
+3,"NB, SVM, RF, XLM-R training",PARTIAL,3 source-label binary models compared and saved,"3-class independently sourced, XLM-R trained GPU weights, final metrics"
+4,URL RF/WHOIS,OFFLINE_POLICY_FIX_TESTED_RF_STILL_BLOCKED,"Step44: 30 ordinary URL samples no high alerts; 18 authored deceptive URL QA cases detected; historical RF 8-10 false alarms","Independent recent real URL validation, supervised classifier deployment gate; WHOIS optional"
+5,Combined risk,PROVISIONAL,"API risk 0-100, three verdicts, sources separate",Calibrate thresholds and combined prediction
+6,SHAP/LIME,PARTIAL,Offline SHAP script and heuristics,"Live SHAP/LIME fidelity, evaluated explanations"
+7,REST API validation,IMPLEMENTED_TESTED,"FastAPI POST /analyze, optional sender/org, tests",Rate limiting/abuse protections
+8,Website demo,IMPLEMENTED_OLDER_DEPLOY,Public Vercel prior version with modern interface,Test new backend if and when deployed
+9,50-100 external real messages,BLOCKED,"100 queue auto-triaged, no human verifier","Independent consent + label, holdout error report"
+10,Documentation/GitHub/diagrams,PARTIAL,"README, docs, diagrams, master status, reproducibility",Final evidence-backed FYP report and viva signoff

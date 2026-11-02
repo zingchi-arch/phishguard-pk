@@ -7,7 +7,7 @@ client=TestClient(app)
 def test_home_website_and_files():
     r=client.get('/')
     assert r.status_code==200
-    for phrase in ('Detect phishing', 'English', 'Roman Urdu','اردو','Batch CSV'):
+    for phrase in ('Know the risk.', 'English', 'Roman Urdu','اردو','Batch CSV'):
         assert phrase in r.text
     assert client.get('/styles.css').status_code==200
     js=client.get('/app.js')
@@ -67,4 +67,4 @@ def test_reserved_url_not_fetched_and_scored():
     r=client.post('/analyze',json={'message':'Review: http://example.invalid/login'})
     assert r.status_code==200
     assert r.json()['urls']
-    assert r.json()['url_model_status']=='heuristic_only_unvalidated'
+    assert r.json()['url_model_status']=='offline_structural_rules_unvalidated'
