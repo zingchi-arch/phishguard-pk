@@ -27,6 +27,9 @@ REFERENCE_DOMAINS = {
     'alfalah': ('bankalfalah.com',),
     'easypaisa': ('easypaisa.com.pk',),
 }
+# A namespace marker, not an assertion that every *.gov.pk site is authentic.
+# Used solely to detect gov.pk appended to an unrelated destination hostname.
+PUBLIC_SECTOR_NAMESPACE_MARKERS = ('gov.pk',)
 SHORTENERS = frozenset({'bit.ly', 'tinyurl.com', 't.co', 'cutt.ly', 'is.gd', 'rb.gy', 'ow.ly', 'shorturl.at'})
 AUTH_ACTION = re.compile(r'(?i)(?:^|[/?#&=_-])(?:login|signin|sign-in|verify|verification|reset-password|password|otp|kyc|claim-prize|claim)(?:$|[/?#&=_-])')
 SCAM_BAIT = re.compile(r'(?i)(?:^|[/?#&=_-])(?:prize|winner|free-money|claim-reward|cash-reward|bisp-payment|8171-payment)(?:$|[/?#&=_-])')
@@ -42,6 +45,16 @@ def _brand_host_signal(host: str):
     No ownership claim: official domains may be compromised and lookalike sites
     may be benign. Signals are intentionally conservative.
     """
+    for marker in PUBLIC_SECTOR_NAMESPACE_MARKERS:
+        if _is_domain_or_subdomain(host, marker):
+            continue
+        if host.startswith(marker + '.') or ('.' + marker + '.') in host or host.startswith(marker + '-'):
+            return 88, 'Hostname includes a government-style .gov.pk marker but points to another domain.'
+        dashed = marker.replace('.', '-')
+        if (host.startswith(dashed + '.') or host.startswith(dashed + '-')) and re.search(
+            r'(?i)(?:verify|payment|8171|challan|account|login|claim)', host
+        ):
+            return 82, 'Hostname imitates a government domain spelling with payment or verification language.'
     for brand, official_domains in REFERENCE_DOMAINS.items():
         if any(_is_domain_or_subdomain(host, domain) for domain in official_domains):
             continue
@@ -50,6 +63,15 @@ def _brand_host_signal(host: str):
         if any(host.startswith(domain + '.') or ('.' + domain + '.') in host
                or host.startswith(domain + '-') for domain in official_domains):
             return 88, f'Domain resembles {brand} but the actual hostname is different; check the full hostname.'
+        # Entire official domain with dots swapped for hyphens, for example
+        # bisp-gov-pk.verify.example. Strong spoof cue only when combined with
+        # account/payment context; do not classify all mentions as phishing.
+        for domain in official_domains:
+            dashed = domain.replace('.', '-')
+            if (host.startswith(dashed + '.') or host.startswith(dashed + '-')) and re.search(
+                r'(?i)(?:login|verify|payment|8171|claim|otp|kyc|prize|reward|account)', host
+            ):
+                return 82, f'Hostname uses a hyphenated spelling of a {brand} reference with a sensitive action.'
         # Bounded brand tokens with login / verification cues can be suspicious;
         # ordinary brand-related fan/project domains are not automatically scams.
         if re.search(r'(?i)(?:^|[.-])' + re.escape(brand) + r'(?:[.-]|$)', host):
