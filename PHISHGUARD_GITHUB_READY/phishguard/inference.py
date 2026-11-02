@@ -6,6 +6,7 @@ import numpy as np
 from .preprocessing import detect_language
 from .urls import extract_urls, feature_vector, heuristic_url_risk, url_reasons, url_features
 from .explain import evidence_patterns, highlighted_terms, model_top_tokens, critical_rule_risk
+from .pakistan_rules import assess_pakistani_context, looks_like_plain_greeting
 
 MODEL_DIR = Path(__file__).resolve().parents[1] / 'models'
 LABELS = ['Safe','Suspicious','Scam']
@@ -30,7 +31,7 @@ class Analyzer:
             import json
             self.model_metadata=json.loads(meta.read_text(encoding='utf-8'))
 
-    def analyze(self,message: str):
+    def analyze(self,message: str, sender_id: str | None = None, claimed_org: str | None = None):
         if not isinstance(message,str) or not message.strip():
             raise ValueError('Please enter a message.')
         if len(message)>10000:
@@ -63,19 +64,33 @@ class Analyzer:
         # Both signals contribute when URLs exist. No URL => text only.
         risk=0.7*text_risk+0.3*url_risk if urls else text_risk
         rule_floor,rule_reason=critical_rule_risk(message)
-        risk=max(risk,rule_floor)
+        pk_indicators=assess_pakistani_context(message,sender_id=sender_id,claimed_org=claimed_org)
+        pk_floor=max((p.floor for p in pk_indicators),default=0.0)
+        risk=max(risk,rule_floor,pk_floor)
+        # The original synthetic classifier sometimes overflags Urdu greetings.
+        # Only pure, no-link, no-action social greetings qualify. This is a
+        # transparent heuristic guard, not model calibration or proof of safety.
+        greeting_guard = looks_like_plain_greeting(message) and not urls and rule_floor == 0 and pk_floor == 0
+        if greeting_guard:
+            risk=min(risk,39.0)
         risk=round(float(min(100,max(0,risk))),1)
         verdict='Scam' if risk>=SCAM_THRESHOLD else ('Suspicious' if risk>=SUSPICIOUS_THRESHOLD else 'Safe')
         clues=evidence_patterns(message)
         explanation=[]
+        if greeting_guard:
+            explanation.append('Ordinary personal greeting without a link, prize, payment or credential request; the sender is not authenticated.')
         if rule_reason: explanation.append(rule_reason)
+        explanation.extend(p.reason for p in pk_indicators[:3])
         if clues: explanation.extend(clues)
         if url_results: explanation.extend(url_results[0]['reasons'][:3])
         if not explanation: explanation.append('No strong pattern flags; classification is uncertain.')
         explanation.append('Indicative AI assessment only: verify through an official channel; never share OTPs or passwords.')
         return {'verdict':verdict,'risk_score':risk,'language_detected':language,
             'text_risk_indicator':round(float(text_risk),1),
-            'safety_rule_floor':rule_floor,
+            'safety_rule_floor':max(rule_floor,pk_floor),
+            'pakistan_rule_ids':[p.rule_id for p in pk_indicators],
+            'sender_authentication':'NOT_VERIFIED',
+            'personal_greeting_guard_applied':greeting_guard,
             'decision_thresholds':{'suspicious':SUSPICIOUS_THRESHOLD, 'scam':SCAM_THRESHOLD},
             'url_risk_indicator':round(float(url_risk),1) if urls else None,
             'url_model_status':'real_labeled_random_forest' if self.url_model is not None else 'heuristic_only_unvalidated',
@@ -86,7 +101,7 @@ class Analyzer:
 
 _ANALYZER=None
 
-def analyze_message(message):
+def analyze_message(message, sender_id=None, claimed_org=None):
     global _ANALYZER
     if _ANALYZER is None: _ANALYZER=Analyzer()
-    return _ANALYZER.analyze(message)
+    return _ANALYZER.analyze(message,sender_id=sender_id,claimed_org=claimed_org)

@@ -41,9 +41,9 @@ def critical_rule_risk(message):
     """
     t=(message or '').lower()
     # Explicit education / protective messages should not activate this particular override.
-    if re.search(r'(do not share|never share|don.t share|share na karein|mat bhej|مت بھیج|کبھی نہ|ہرگز نہ|خبردار)',t):
+    if re.search(r'(do not share|never share|don.t share|share na karein|mat bhej|مت بھیج|کبھی نہ|ہرگز نہ|نہ بتائیں|نہیں بتائیں|خبردار)',t):
         return 0,''
-    bait=bool(re.search(r'(prize|lottery|claim|reward|win\b|winner|mubarak|inaam|free money|bonus|bisp|ehsaas|انعام|مبارک|رقم|ایوارڈ|جیت|احساس)',t))
+    bait=bool(re.search(r'(prize|lottery|claim|reward|win\b|winner|inaam|free money|bonus|bisp|ehsaas|انعام|مبارک|رقم|ایوارڈ|جیت|احساس)',t))
     threat=bool(re.search(r'(suspend|block|band ho|urgent|immediately|foran|abhi|frozen|blocked|آخری|فوری|فوراً|بند|معطل)',t))
     ask=bool(re.search(r'(send|share|submit|enter|provide|click|verify|login|bhej|karein|karo|kren|tasdeeq|تصديق|تصدیق|بھیج|فراہم|شیئر|درج|کلک|دیں|کریں)',t))
     sensitive=bool(re.search(r'(otp|pin\b|password|bank detail|card number|cnic|account detail|verification code|one.time.password|او ٹی پی|پن|پاس ورڈ|بینک تفصیل|بینک تفصیلات|شناختی کارڈ|خفیہ کوڈ)',t))
