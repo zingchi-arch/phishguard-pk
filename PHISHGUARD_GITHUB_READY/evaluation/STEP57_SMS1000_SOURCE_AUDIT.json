@@ -1,0 +1,33 @@
+{
+  "dataset": "user_uploaded_phishing_dataset_1000.xlsx",
+  "usage": "provisional_language_and_label_regression_only",
+  "records": 1000,
+  "label_0_count": 595,
+  "label_1_count": 405,
+  "raw_unique": 1000,
+  "normalized_unique": 909,
+  "urdu_script_records": 0,
+  "independent_human_verified": false,
+  "consent_and_origins_documented": false,
+  "third_class_Suspicious_in_source": false,
+  "source_category_count": 16,
+  "original_label_mapping": "0 non-phishing; 1 phishing (user-supplied source), not Safe/Suspicious/Scam gold labels",
+  "source_quality_notes": "Repetitive phrasing and 91 normalized duplicate messages; not a real-world holdout.",
+  "no_raw_SMS_in_repository": true,
+  "existing_text_model_batch_diagnostic_on_binary_source_labels": {
+    "note": "Text classifier only, NOT full hybrid analyzer. Source text likely templates. No independent real-SMS evaluation.",
+    "source_nonphishing_595": {
+      "Safe": 595,
+      "Suspicious": 0,
+      "Scam": 0
+    },
+    "source_phishing_405": {
+      "Safe": 0,
+      "Suspicious": 48,
+      "Scam": 357
+    },
+    "label_1_warning_total": 405,
+    "same_source_or_template_leakage_not_excluded": true,
+    "not_valid_external_accuracy_claim": true
+  }
+}

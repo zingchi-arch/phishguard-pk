@@ -96,8 +96,33 @@ def model_status():
         'explainability_live':'opt_in_local_token_deletion_NOT_SHAP_OR_LIME',
         'explainability_research':'SHAP_and_LIME_offline_only_when_optional_dependencies_installed',
         'disclaimer':'Risk indicators, not calibrated fraud probabilities.',
-        'research_status_endpoint':'/research-status'
+        'research_status_endpoint':'/research-status',
+        'urlphish_2026_research_candidate':(root/'urlphish_2026_RESEARCH_ONLY.joblib').exists(),
+        'urlphish_2026_model_in_live_decision':False,
+        'uploaded_sms_1000_training_status':'provisional_audit_only_no_unverified_label_autopromotion'
     }
+
+
+def _latest_uploaded_dataset_status():
+    """Aggregated research evidence only; never exposes original URL/SMS rows."""
+    root=Path(__file__).resolve().parents[1]
+    try:
+        url=json.loads((root/'evaluation'/'STEP57_URLPHISH_RESEARCH_RESULTS.json').read_text(encoding='utf-8'))
+        sms=json.loads((root/'evaluation'/'STEP57_SMS1000_SOURCE_AUDIT.json').read_text(encoding='utf-8'))
+        return {
+            'urlphish_records_after_dedup':int(url['rows']),
+            'urlphish_same_source_accuracy':float(url['heldout_same_source']['accuracy']),
+            'urlphish_phishing_recall':float(url['heldout_same_source']['phishing_recall']),
+            'urlphish_constructed_deeplink_warnings':int(url['constructed_deep_path_warnings']),
+            'urlphish_constructed_deeplink_probes':int(url['constructed_deep_path_probes']),
+            'urlphish_url_model_live':False,
+            'sms1000_research_records':int(sms['records']),
+            'sms1000_urdu_script_records':int(sms['urdu_script_records']),
+            'sms1000_independent_human_verified':False,
+            'explanation':'URL-Phish is source-labelled research; SMS spreadsheet has provisional binary labels. Neither supplies the required verified 3-language, 3-class independent holdout.'
+        }
+    except (OSError, KeyError, TypeError, ValueError):
+        return {'status':'research_dataset_summary_unavailable','urlphish_url_model_live':False}
 
 
 @app.get('/research-status')
@@ -125,6 +150,7 @@ def research_status():
             'real_world_independent_accuracy_verified':False,
             'url_source_caveat':'OpenPhish feed is provider-labelled; Tranco homepages are popularity proxies, not authenticated safe sites.',
             'sms_external_test_status':'50-100 independently reviewed real SMS benchmark pending',
+            'latest_uploaded_dataset_status':_latest_uploaded_dataset_status(),
         }
     except (OSError, ValueError, KeyError, TypeError):
         return {'status':'research_evidence_unavailable', 'supervised_url_model_deployed':False,

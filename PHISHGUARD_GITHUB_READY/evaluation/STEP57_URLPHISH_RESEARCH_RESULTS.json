@@ -1,0 +1,50 @@
+{
+  "type": "STEP57_RESEARCH_ONLY_URLPHISH_2026",
+  "dataset_label_mapping": {
+    "0": "benign",
+    "1": "phishing"
+  },
+  "license": "CC BY 4.0; URL-Phish Mendeley Data DOI 10.17632/65z9twcx3r.2",
+  "source_label_counts": {
+    "0": 98641,
+    "1": 16590
+  },
+  "rows": 115231,
+  "cleaning": {
+    "exact_duplicates_removed": 1369,
+    "conflicting_labels_seen": 0
+  },
+  "domain_grouping": "libpsl_registrable",
+  "split_counts": {
+    "train": 80752,
+    "validation": 17872,
+    "test": 16607
+  },
+  "registered_domain_group_overlap": 0,
+  "threshold_from_validation_only": 0.5,
+  "heldout_same_source": {
+    "n": 16607,
+    "confusion_true_0_benign_1_phishing": [
+      [
+        14483,
+        201
+      ],
+      [
+        309,
+        1614
+      ]
+    ],
+    "accuracy": 0.9693,
+    "phishing_precision": 0.8893,
+    "phishing_recall": 0.8393,
+    "phishing_f1": 0.8636,
+    "benign_false_warning_rate": 0.0137
+  },
+  "reference_30_warning_count": 4,
+  "constructed_deep_path_probes": 48,
+  "constructed_deep_path_warnings": 34,
+  "external_openphish_live_metrics": "NOT_EVALUATED_NO_RAW_TEST_FEED_AVAILABLE",
+  "external_tranco_2026_metrics": "NOT_EVALUATED_NO_RAW_TEST_FEED_AVAILABLE",
+  "model_deployment_approved": false,
+  "note": "Same-source URL-Phish group-heldout test does not prove current external URL accuracy. Reference and deep-link probes are not independently authenticated benign samples."
+}

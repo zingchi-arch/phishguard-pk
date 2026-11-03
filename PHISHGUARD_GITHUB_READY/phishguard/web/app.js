@@ -95,6 +95,10 @@ $('#explain-model').onclick=async()=>{
   const b=dom('span','', '');b.appendChild(dom('strong','',`${x.experimental_model_tranco_warnings} / ${x.tranco_popular_domains}`));b.appendChild(dom('small','', 'Tranco homepage proxies warned by rejected experimental AI'));
   stats.append(a,b);target.appendChild(stats);
   target.appendChild(dom('p','', 'The experimental URL model is NOT deployed. Provider labels and popular domains are not independently validated safe/unsafe ground truth. Risk scores are not calibrated probabilities.'));
+  const latest=x.latest_uploaded_dataset_status;
+  if(latest && latest.urlphish_records_after_dedup){
+    target.appendChild(dom('p','', `New research audit: ${latest.urlphish_records_after_dedup.toLocaleString()} URL-Phish records and ${latest.sms1000_research_records} SMS candidates reviewed. Experimental URL ML stayed OFF after ${latest.urlphish_constructed_deeplink_warnings}/${latest.urlphish_constructed_deeplink_probes} constructed deep-link warnings. No independently verified Urdu-script holdout in the supplied SMS sheet.`));
+  }
  }catch{ /* Static research note stays visible if status endpoint is unavailable. */ }
 })();
 

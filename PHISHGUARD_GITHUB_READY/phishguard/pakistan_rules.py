@@ -33,6 +33,11 @@ SECURITY_WARNING = rx(r'\b(?:do\s*not\s*share|don.t\s*share|never\s*share|beware
 JOB_VISA = rx(r'\b(?:job|visa|work\s*permit|appointment\s*letter|naukri|nokri|sarkari\s*job|vacancy|recruitment)\b|نوکری|ملازمت|ویزا|جاب')
 ADVANCE_FEE = rx(r'\b(?:processing\s*fee|registration\s*fee|advance\s*fee|security\s*deposit)\b|رجسٹریشن\s*فیس|پروسیسنگ\s*فیس|پیشگی\s*رقم')
 PAY_TO_WALLET = rx(r'\b(?:jazzcash|easypaisa|sadapay|nayapay|wallet|private\s*account)\b|جاز\s*کیش|ایزی\s*پیسہ|ذاتی\s*اکاؤنٹ')
+BANK_ACCOUNT_THREAT = rx(r'\b(?:account|acount|acct|atm\s+card)\b|اکاؤنٹ|اَکاؤنٹ|بینک\s*کھاتہ')
+BLOCK_STATUS = rx(r'\b(?:block(?:ed)?|freeze|frozen|suspend(?:ed)?|band\s*ho|bnd\s*ho)\b|بند\s*ہو|معطل')
+PRIVATE_MOBILE = rx(r'(?<!\d)(?:\+92|0)3\d{2}[- ]?\d{7}(?!\d)')
+IMMEDIATE_RESPONSE = rx(r'\b(?:abhi|foran|immediately|urgent|call\s*karein|sms\s*karin|pin\s*code\s*dain|details\s*send|warna)\b|فوراً|ابھی|ورنہ|فوری')
+
 
 
 @dataclass(frozen=True)
@@ -72,6 +77,13 @@ def assess_pakistani_context(message: str, sender_id: str | None = None, claimed
 
     if BANK.search(context) and has_secret_request:
         flags.append(Indicator(90, 'Bank or wallet claim requests OTP, PIN, password, or card information.', 'PK_BANK_SECRET_REQUEST'))
+
+    # Fake bank-block messages redirect victims to a PERSONAL 03xx mobile.
+    # A generic bank transaction alert saying 'call the helpline' must NOT match.
+    if (BANK.search(context) and BANK_ACCOUNT_THREAT.search(text) and
+            BLOCK_STATUS.search(text) and PRIVATE_MOBILE.search(text) and
+            IMMEDIATE_RESPONSE.search(text) and not protect_secret_advice):
+        flags.append(Indicator(82, 'Claimed blocked bank/wallet account demands an urgent reply to a private mobile number. Verify through the bank app or independently found helpline.', 'PK_BANK_BLOCK_PRIVATE_MOBILE'))
 
     if CHALLAN.search(context) and has_link and not protect_secret_advice:
         flags.append(Indicator(85, 'E-challan SMS includes a link: verify by independently opening the official authority website.', 'PK_CHALLAN_LINK'))
