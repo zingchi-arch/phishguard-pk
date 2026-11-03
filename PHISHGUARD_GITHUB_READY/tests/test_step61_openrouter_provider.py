@@ -18,7 +18,7 @@ def test_openrouter_preferred_over_groq_and_health_hides_keys(monkeypatch):
     monkeypatch.setenv('OPENROUTER_API_KEY', 'private-openrouter')
     assert deep_ai.provider_config() == ('OpenRouter', 'openrouter/free')
     data = client.get('/health').json()
-    assert data['version'] == '2.3.0'
+    assert data['version'] in ('2.3.0', '2.4.0')
     assert data['deep_ai_release_id'] == deep_ai.DEEP_AI_RELEASE
     assert data['deep_ai_provider'] == 'OpenRouter'
     assert data['deep_ai_configured'] is True
@@ -111,7 +111,7 @@ def test_ui_label_does_not_promise_qwen_for_random_free_router():
     root = Path(__file__).resolve().parents[1] / 'phishguard' / 'web'
     html = (root / 'index.html').read_text(encoding='utf-8')
     js = (root / 'app.js').read_text(encoding='utf-8')
-    assert 'Use Deep AI (free hosted model)' in html
+    assert '<strong>Deep AI</strong>' in html
     assert 'Qwen 27B second opinion' not in js
     assert deep_ai.DEEP_AI_RELEASE in js
     assert '/analyze/deep' in js

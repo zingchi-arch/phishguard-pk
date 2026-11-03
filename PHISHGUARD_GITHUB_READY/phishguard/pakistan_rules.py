@@ -36,7 +36,13 @@ ADVANCE_FEE = rx(r'\b(?:processing\s*fee|registration\s*fee|advance\s*fee|securi
 PAY_TO_WALLET = rx(r'\b(?:jazzcash|easypaisa|sadapay|nayapay|wallet|private\s*account)\b|جاز\s*کیش|ایزی\s*پیسہ|ذاتی\s*اکاؤنٹ')
 BANK_ACCOUNT_THREAT = rx(r'\b(?:account|acount|acct|atm\s+card)\b|اکاؤنٹ|اَکاؤنٹ|بینک\s*کھاتہ')
 BLOCK_STATUS = rx(r'\b(?:block(?:ed)?|freeze|frozen|suspend(?:ed)?|band\s*ho|bnd\s*ho)\b|بند\s*ہو|معطل')
-PRIVATE_MOBILE = rx(r'(?<!\d)(?:\+92|0)3\d{2}[- ]?\d{7}(?!\d)')
+PRIVATE_MOBILE = rx(r'(?<!\d)(?:\+92|0)3\d{2}[- .]?\d{7,8}(?!\d)')
+# Unexpected prize-award wording common in Roman Urdu SMS. Keep prize vs. plain
+# bank account approval separate: these are signals, not proof of fraud.
+AWARD = rx(r'\b(?:manzoor|manzur|manzoori|approv(?:e|ed|al)|award(?:ed)?|won|winner|winning|jeet(?:a|e|i|ay)?|nikl(?:a|i|ay|e)|nkal(?:a|i|ay)|mil(?:a|i|ay|e)|selected|inaam|prize|mubarak)\b|منظور|انعام|جیت|نکل|مل\s*گئ|مبارک|منتخب')
+PRIZE_ITEM = rx(r'\b(?:honda|bike|motor\s*cycle|motorcycle|car|gaari|gari|gold|sona|cash|paisa|paise|rupees?|rupay|lakhs?|tola|gift|reward|inaam|prize|lottery|draw|iphone|mobile\s*phone)\b|موٹر\s*سائیکل|بائیک|گاڑی|کار|سونا|گولڈ|انعام|رقم|روپے|لاکھ|تحفہ')
+CONTACT_REDIRECT = rx(r'\b(?:what(?:s|z)?app|watsapp|whatsap|wa\s*me|rabta|contact|call|reach|msg|message|sms|reply|jawab|sampark|is\s*number\s*(?:par|pe))\b|واٹس\s*ایپ|واٹس\s*اپ|رابطہ|فون\s*کریں|نمبر\s*پر|کال\s*کریں')
+PRIZE_WARNING = rx(r'\b(?:beware|fraud\s*alert|scam\s*alert|scams?\s+(?:are\s+)?fake|fake\s*(?:prize|message|number)|fraud\s*hai|scam\s*hai|jhoot(?:a|i)?\s*hai|reply\s*mat\s*karo|rabta\s*na\s*karo|(?:do\s*not|don.t|never)\s*(?:call|contact|reply)|(?:contact|rabta|reply)\s+(?:mat|na|nahi))\b|جعلی\s*انعام|فراڈ\s*پیغام|دھوکہ|انعامی\s*فراڈ')
 IMMEDIATE_RESPONSE = rx(r'\b(?:abhi|foran|immediately|urgent|call\s*karein|sms\s*karin|pin\s*code\s*dain|details\s*send|warna)\b|فوراً|ابھی|ورنہ|فوری')
 
 
@@ -69,11 +75,20 @@ def assess_pakistani_context(message: str, sender_id: str | None = None, claimed
     elif BISP.search(context) and sender_id and sender_id.strip() != '8171' and CLAIM.search(text):
         flags.append(Indicator(65, 'BISP benefit claim from non-8171 sender. A displayed sender ID can be spoofed and is not verified here.', 'PK_BISP_UNKNOWN_SENDER'))
 
-    if JEETO.search(context) and WIN.search(text) and (has_contact or has_link or asks_money):
-        flags.append(Indicator(90, 'Unexpected Jeeto Pakistan prize claim redirects to contact, link or payment.', 'PK_JEETO_CLAIM'))
-    elif STRONG_PRIZE.search(text) and WIN.search(text) and asks_money and not PERSONAL_GREETING.search(text):
+    # First distinguish an actual prize notification redirect from a news or
+    # safety warning ABOUT scams. A named show is not evidence of authenticity.
+    award_claim = bool(AWARD.search(text))
+    prize_item = bool(PRIZE_ITEM.search(text))
+    personal_contact = bool(PRIVATE_MOBILE.search(text))
+    redirect = bool(CONTACT_REDIRECT.search(text)) and (has_contact or personal_contact)
+    warned_about_prize = bool(PRIZE_WARNING.search(text))
+    if JEETO.search(context) and award_claim and (redirect or has_link or asks_money or personal_contact) and not warned_about_prize:
+        flags.append(Indicator(92, 'Jeeto Pakistan/Honda prize approval redirects to a personal contact, WhatsApp or link. The claim and contact are NOT authenticated; verify through ARY Digital official channels.', 'PK_JEETO_CLAIM'))
+    elif award_claim and prize_item and (redirect or has_link) and personal_contact and not warned_about_prize:
+        flags.append(Indicator(88, 'Unexpected prize, bike, cash or gold award asks you to contact a private mobile/WhatsApp number. High-risk prize-claim pattern; source is unverified.', 'PK_PRIZE_PRIVATE_WHATSAPP'))
+    elif STRONG_PRIZE.search(text) and WIN.search(text) and asks_money and not PERSONAL_GREETING.search(text) and not warned_about_prize:
         flags.append(Indicator(90, 'Prize or winnings claim with advance fee or payment request.', 'PK_PRIZE_ADVANCE_FEE'))
-    elif STRONG_PRIZE.search(text) and WIN.search(text) and (has_link or has_contact) and not PERSONAL_GREETING.search(text):
+    elif STRONG_PRIZE.search(text) and WIN.search(text) and (has_link or has_contact) and not PERSONAL_GREETING.search(text) and not warned_about_prize:
         flags.append(Indicator(72, 'Prize or reward claim includes an outside link or contact; verify independently.', 'PK_PRIZE_REDIRECT'))
 
     if BANK.search(context) and has_secret_request:

@@ -70,10 +70,10 @@
             <textarea id="message" dir="auto" maxlength="10000" placeholder="Paste an SMS, WhatsApp message, email or suspicious link..." spellcheck="false"></textarea>
             <div class="below-textarea"><span><svg class="icon"><use href="#i-lock"/></svg> Never paste OTPs, passwords or personal information.</span><span id="counter">0 / 10,000</span></div>
             <div class="deep-ai-setting" id="deep-ai-setting">
-              <label class="deep-ai-label" for="deep-ai-optin"><input type="checkbox" id="deep-ai-optin" disabled>
-                <span><strong>Use Deep AI (free hosted model)</strong><small>Optional. Sends best-effort redacted text to OpenRouter (or Groq) for a second opinion. Model may vary. Do not paste private details.</small></span>
+              <label class="deep-ai-label" for="deep-ai-optin"><input type="checkbox" id="deep-ai-optin" disabled aria-describedby="deep-ai-privacy-note">
+                <span><strong>Deep AI</strong></span>
               </label>
-              <p class="deep-ai-availability" id="deep-ai-availability" aria-live="polite">Checking Deep AI availability...</p>
+              <span class="sr-only" id="deep-ai-privacy-note">Optional. When selected, best-effort redacted message text is sent to an external AI provider. Never include passwords or OTPs.</span>
             </div>
             <div class="form-actions"><button id="check" class="primary">Analyze message <svg class="icon"><use href="#i-arrow"/></svg></button><button id="clear" class="secondary">Clear</button></div>
             <div class="examples"><span class="examples-label">QUICK EXAMPLES</span><button class="example" data-sample="safe">Safe meeting note</button><button class="example" data-sample="roman">Roman Urdu warning</button><button class="example" data-sample="urdu">اردو فراڈ</button><button class="example" data-sample="link">Suspicious link</button></div>
@@ -83,7 +83,7 @@
               <div class="meter"><div id="meter-fill"></div></div>
               <div class="link-caution" id="link-caution" role="note" hidden><strong>Link not verified</strong>No URL was opened, checked against a live security service, or authenticated. Even a low score cannot confirm a link is safe. Use the official app or type the known website yourself.</div>
               <div id="deep-ai-result" class="deep-ai-result" role="status" aria-live="polite" hidden></div>
-              <div class="result-columns"><div><h4>Why this result?</h4><ul id="reasons" class="reasons"></ul><h4>Flagged words</h4><div id="terms" class="term-list"></div></div><div><h4>Links screened (offline) <span id="url-count"></span></h4><div id="urls"></div><div class="detail-block"><h4>Signals</h4><div id="signals"></div></div></div></div>
+              <div class="result-columns"><div><h4>Why this result?</h4><ul id="reasons" class="reasons"></ul><h4>Flagged words</h4><div id="terms" class="term-list"></div></div><div><h4>Links screened (offline) <span id="url-count"></span></h4><div id="urls"></div><div class="detail-block"><h4>Signals</h4><div id="signals"></div><div id="official-contact-evidence" class="official-contact-evidence" hidden></div></div></div></div>
               <div class="model-explain-action"><button id="explain-model" class="secondary smallbutton" type="button" hidden>Explain text model (experimental)</button></div>
               <div id="model-evidence" class="model-evidence" aria-live="polite" hidden></div>
               <div class="result-footer"><span>Risk indicators are not verified probabilities. A Safe result does not prove the message is genuine.</span><div class="report-actions"><button id="export-pdf" class="report-pdf-btn" type="button" aria-label="Download PDF analysis report"><svg class="icon"><use href="#i-download"/></svg> Download PDF report</button><button id="export-json" class="secondary smallbutton" type="button">Export JSON <svg class="icon"><use href="#i-download"/></svg></button></div></div>

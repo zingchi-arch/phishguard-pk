@@ -27,16 +27,14 @@ function clearChildren(el){while(el.firstChild)el.removeChild(el.firstChild)}
       node.closest('.tag')?.setAttribute('title','The live server has not deployed the Step 59 intent engine.');
     }
     const optin=$('#deep-ai-optin');
-    const availability=$('#deep-ai-availability');
     if(data.deep_ai_release_id===EXPECTED_DEEP_AI && data.deep_ai_configured===true){
       optin.disabled=false;
-      text(availability,`Deep AI available via ${data.deep_ai_provider||'external provider'}. Sends best-effort redacted text only after opt-in.`);
     }else if(data.deep_ai_release_id===EXPECTED_DEEP_AI){
-      text(availability,'Deep AI not configured. Set OPENROUTER_API_KEY in Vercel. Local AI still works.');
+      optin.title='Deep AI not configured by site owner';
     }else{
-      text(availability,'Deep AI requires the Step 61 GitHub update. Local AI remains available.');
+      optin.title='Deep AI not available on this backend';
     }
-  }catch{text(node,'Engine version unavailable');text($('#deep-ai-availability'),'Deep AI availability unavailable. Local analysis still works.');}
+  }catch{text(node,'Engine version unavailable');}
 })();
 function showError(msg){const e=$('#error');text(e,msg);e.hidden=false}
 function hideError(){$('#error').hidden=true}
@@ -79,6 +77,49 @@ function render(result){last=result;$('#result').hidden=false;
   urls.appendChild(card)
  });
  const signals=$('#signals');clearChildren(signals);[ ['Raw text-model indicator (before context)',result.text_risk_indicator], ['Highest URL risk',result.url_risk_indicator===null?'N/A':result.url_risk_indicator], ['Safety rule minimum',result.safety_rule_floor], ['Credential-sharing context',result.credential_request_detected?'Request detected':(result.security_advice_guard_applied?'Protective advice': 'Not established')], ['AI message intent',({protect:'Safety advice',request:'Credential request',mixed:'Mixed warning + request',other:'Other or uncertain',unavailable:'Model unavailable'})[result.intent_ai?.label]||'Legacy engine'], ['Backend release',result.engine_release||'OLD BACKEND / NOT UPDATED'] ].forEach(([a,b])=>signals.appendChild(dom('div','',`${a}: ${b}`)));
+ displayOfficialReference(result.official_contact_reference);
+}
+// Only a small fixed registry of official publisher/bank pages is checked.
+// Never navigate to URLs or numbers supplied inside a suspicious message.
+function displayOfficialReference(info){
+ const panel=$('#official-contact-evidence');clearChildren(panel);
+ const useful=info && (info.contact_numbers_found || info.unrecognised_url_hosts || info.official_domain_link_matches);
+ panel.hidden=!useful;
+ if(!useful)return;
+ panel.appendChild(dom('strong','',`${info.organization}: official contact reference`));
+ const labels={
+  number_not_in_limited_reference:'The number is not in our limited reference list. This is NOT proof it is fake.',
+  unrecognised_claimed_link:'The supplied link is not on the listed official domain. Do not open it from the message.',
+  number_in_official_reference_not_sender_verified:'The number matches a published reference. This does NOT authenticate the message sender.',
+  official_domain_match_sender_not_verified:'The link uses a listed official domain, but the sender is NOT authenticated.',
+  no_contact_reference_to_compare:'No contact details to compare.'
+ };
+ panel.appendChild(dom('p','',labels[info.status]||'Contact and sender identity not authenticated.'));
+ const source=dom('a','','Check official source');
+ source.href=info.official_source_url;source.target='_blank';source.rel='noopener noreferrer';
+ panel.appendChild(source);
+ const status=dom('p','official-online-status','');status.id='official-online-status';panel.appendChild(status);
+}
+async function crosscheckOfficialSource(message, info, sequence){
+ if(!info || !(info.contact_numbers_found||info.unrecognised_url_hosts||info.official_domain_link_matches))return;
+ const status=$('#official-online-status');if(!status)return;
+ text(status,'Checking published official page...');
+ try{
+  const check=await post('/verify/contact',{message});
+  if(sequence!==requestSequence || !status.isConnected)return;
+  const labels={
+   number_appears_on_checked_page:'Number appears on the checked official page. Sender still unverified.',
+   number_not_found_on_this_page_INCONCLUSIVE:'Number not found on this official page. This is NOT proof of fraud.',
+   no_phone_to_crosscheck:'No phone number to cross-check; compare the domain with the official website.',
+   official_page_unavailable:'Official page could not be checked live.',
+   official_page_too_large:'Official source was too large for the limited checker.',
+   official_page_not_html:'Official source could not be text-checked.',
+   source_not_allowlisted:'Official source could not be safely checked.'
+  };
+  text(status,labels[check.online_status]||'No conclusive online contact verification available.');
+ }catch{
+  if(sequence===requestSequence && status.isConnected)text(status,'Official-page check unavailable; verify independently.');
+ }
 }
 $('#check').onclick=async()=>{
  hideError();const m=$('#message').value.trim();
@@ -93,6 +134,8 @@ $('#check').onclick=async()=>{
    // a result for old text, or allow exporting the stale message as a PDF.
    if(myRequest!==requestSequence)return;
    lastAnalyzedMessage=m;render(data);
+   // The answer renders immediately; the limited official-page check is extra evidence.
+   void crosscheckOfficialSource(m,data.official_contact_reference,myRequest);
    if(data.engine_release!==EXPECTED_ENGINE){
      showError('Old detection backend is still active. The Step 59 fix has NOT been deployed yet.');
    }

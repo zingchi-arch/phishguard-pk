@@ -14,10 +14,11 @@ from .inference import analyze_message, get_analyzer
 from .intent_ai import ENGINE_ID, MODEL_PATH as INTENT_MODEL_PATH
 from .deep_ai import DEEP_AI_RELEASE, MODEL_ID as DEEP_MODEL_ID, MAX_DEEP_CHARS, is_configured, provider_config, analyze_with_deep_ai
 from .attributions import explain_text_deletions, MAX_MESSAGE_CHARS
+from .official_contacts import crosscheck_known_official_page
 
 WEB = Path(__file__).resolve().parent / 'web'
 app = FastAPI(
-    title='PhishGuard-PK', version='2.3.0',
+    title='PhishGuard-PK', version='2.4.0',
     description='Multilingual message + offline URL risk screening. Risk indicators are uncalibrated.',
 )
 # Serve all versioned first-party web assets from the actual app package.
@@ -85,18 +86,19 @@ def pdf_script():
 
 @app.get('/health')
 def health():
-    return {'status':'ok', 'project':'PhishGuard-PK', 'version':'2.3.0',
+    return {'status':'ok', 'project':'PhishGuard-PK', 'version':'2.4.0',
             'release_id':ENGINE_ID, 'intent_ai_available':INTENT_MODEL_PATH.exists(),
             'mode':'development_unvalidated',
             'deep_ai_release_id':DEEP_AI_RELEASE, 'deep_ai_configured':is_configured(),
-            'deep_ai_provider':(provider_config() or ('None', 'none'))[0]}
+            'deep_ai_provider':(provider_config() or ('None', 'none'))[0],
+            'contact_check_release_id':'step62-prize-and-official-sources-v1'}
 
 
 @app.get('/model-status')
 def model_status():
     root = Path(__file__).resolve().parents[1] / 'models'
     return {
-        'version':'2.3.0',
+        'version':'2.4.0',
         'deep_ai_release_id':DEEP_AI_RELEASE,
         'deep_ai_configured':is_configured(),
         'deep_ai_model':(provider_config() or ('None', DEEP_MODEL_ID))[1],
@@ -199,6 +201,16 @@ def analyze_deep(payload: DeepMessageRequest):
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     except RuntimeError as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+
+@app.post('/verify/contact')
+def verify_official_contact(payload: MessageRequest):
+    """Optional trusted-source cross-check. NEVER fetch supplied URLs or numbers.
+
+    This returns limited evidence from a fixed HTTPS official page, NOT proof
+    that a sender, competition, bank SMS, or prize claim is legitimate.
+    """
+    return crosscheck_known_official_page(payload.message, payload.claimed_org)
 
 
 @app.post('/analyze/batch')

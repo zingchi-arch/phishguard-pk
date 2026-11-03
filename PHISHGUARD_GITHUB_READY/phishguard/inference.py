@@ -11,6 +11,7 @@ from .pakistan_rules import assess_pakistani_context, looks_like_plain_greeting
 from .message_intent import interpret_secret_intent
 from .intent_ai import predict_message_intent, ENGINE_ID
 from .url_policy import assess_url
+from .official_contacts import get_official_contact_context
 
 MODEL_DIR = Path(__file__).resolve().parents[1] / 'models'
 LABELS = ['Safe','Suspicious','Scam']
@@ -142,6 +143,7 @@ class Analyzer:
             'text_risk_indicator':round(float(text_risk),1),
             'safety_rule_floor':max(rule_floor,pk_floor),
             'pakistan_rule_ids':[p.rule_id for p in pk_indicators],
+            'official_contact_reference':get_official_contact_context(message, claimed_org),
             'sender_authentication':'NOT_VERIFIED',
             'personal_greeting_guard_applied':greeting_guard,
             'security_advice_detected':intent.protective_advice,
