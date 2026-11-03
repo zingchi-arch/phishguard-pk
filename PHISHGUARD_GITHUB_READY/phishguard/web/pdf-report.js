@@ -131,10 +131,11 @@
     explanations.forEach((reason,i)=>paragraph(`${i+1}. ${reason}`,{size:22,lineHeight:34,gap:6}));
     heading('Flagged words');
     paragraph((result.highlighted_terms||[]).join(', ')||'No specific warning words highlighted.',{size:22});
-    heading('URLs inspected');
+    heading('URLs screened offline (not verified)');
     const urls=Array.isArray(result.urls)?result.urls:[];
     if(!urls.length)paragraph('No URLs found in this message.',{size:22,color:palette.muted});
     urls.forEach((url,i)=>{paragraph(`${i+1}. ${url.url||''}`,{size:21,lineHeight:32,gap:2});paragraph('URL risk indicator: '+String(url.risk_indicator??'N/A')+' / 100',{size:19,color:palette.muted,gap:11});});
+    if(urls.length)paragraph('URLs were not opened or authenticated. A low URL risk indicator does not confirm safety.',{size:19,color:palette.muted,gap:10});
     heading('Model indicators');
     paragraph(`Text risk indicator: ${result.text_risk_indicator??'N/A'} / 100`,{size:21,gap:1});
     paragraph(`Highest URL risk: ${result.url_risk_indicator??'N/A'}`,{size:21,gap:1});

@@ -4,9 +4,11 @@ The server never fetches links included in user messages, never writes submitted
 messages to disk, and is intended for a controlled/local deployment until audited.
 """
 from pathlib import Path
+import json
 from typing import List
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field, field_validator
 from .inference import analyze_message, get_analyzer
 from .attributions import explain_text_deletions, MAX_MESSAGE_CHARS
@@ -16,6 +18,9 @@ app = FastAPI(
     title='PhishGuard-PK', version='2.0.0',
     description='Multilingual message + offline URL risk screening. Risk indicators are uncalibrated.',
 )
+# Serve all versioned first-party web assets from the actual app package.
+# This fixes missing images, motion.js, and the offline PDF generator.
+app.mount('/assets', StaticFiles(directory=WEB / 'assets'), name='assets')
 
 
 class MessageRequest(BaseModel):
@@ -60,6 +65,18 @@ def javascript():
                         headers={'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff'})
 
 
+@app.get('/motion.js', include_in_schema=False)
+def motion_script():
+    return FileResponse(WEB / 'motion.js', media_type='text/javascript',
+                        headers={'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'})
+
+
+@app.get('/pdf-report.js', include_in_schema=False)
+def pdf_script():
+    return FileResponse(WEB / 'pdf-report.js', media_type='text/javascript',
+                        headers={'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'})
+
+
 @app.get('/health')
 def health():
     return {'status':'ok', 'project':'PhishGuard-PK', 'version':'2.0.0',
@@ -78,8 +95,40 @@ def model_status():
         'training_status':'provisional_labels_not_verified',
         'explainability_live':'opt_in_local_token_deletion_NOT_SHAP_OR_LIME',
         'explainability_research':'SHAP_and_LIME_offline_only_when_optional_dependencies_installed',
-        'disclaimer':'Risk indicators, not calibrated fraud probabilities.'
+        'disclaimer':'Risk indicators, not calibrated fraud probabilities.',
+        'research_status_endpoint':'/research-status'
     }
+
+
+@app.get('/research-status')
+def research_status():
+    """Expose source-labelled research *limitations*, not deployable accuracy.
+
+    All metrics are drawn from the existing Step50 and Step51 project files.
+    Never serve experimental model weights, raw SMS, or phishing URLs.
+    """
+    evaluation = Path(__file__).resolve().parents[1] / 'evaluation'
+    try:
+        source = json.loads((evaluation / 'STEP50_EXTERNAL_RESEARCH_RESULTS.json').read_text(encoding='utf-8'))
+        gate = json.loads((evaluation / 'STEP51_RELEASE_GATE_FAIL.json').read_text(encoding='utf-8'))
+        op = source['external_source_diagnostics']['openphish_provider_label']
+        tr = source['external_source_diagnostics']['tranco_homepage_proxy']
+        if source.get('deployment_approved') is not False or gate.get('production_approved') is not False:
+            raise ValueError('The expected blocked release gate is not documented.')
+        return {
+            'status':'research_diagnostics_only',
+            'structural_openphish_warnings':int(op['baseline_structural_45_warnings_n']),
+            'openphish_source_urls':int(op['n']),
+            'experimental_model_tranco_warnings':int(tr['warnings_n']),
+            'tranco_popular_domains':int(tr['n']),
+            'supervised_url_model_deployed':False,
+            'real_world_independent_accuracy_verified':False,
+            'url_source_caveat':'OpenPhish feed is provider-labelled; Tranco homepages are popularity proxies, not authenticated safe sites.',
+            'sms_external_test_status':'50-100 independently reviewed real SMS benchmark pending',
+        }
+    except (OSError, ValueError, KeyError, TypeError):
+        return {'status':'research_evidence_unavailable', 'supervised_url_model_deployed':False,
+                'real_world_independent_accuracy_verified':False}
 
 
 @app.post('/analyze')

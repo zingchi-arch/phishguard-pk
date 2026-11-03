@@ -69,6 +69,7 @@ class Analyzer:
                 'heuristic_indicator':round(heuristic_url_risk(u), 1),
                 'real_data_rf_indicator':round(rf_score,1) if rf_score is not None else None,
                 'url_structural_status':structural.status,
+                'url_authenticity':'NOT_VERIFIED',
                 'hostname_not_authenticated':structural.hostname,
                 'features':url_features(u), 'reasons':list(structural.reasons)})
         url_risk=max((r['risk_indicator'] for r in url_results),default=0)
@@ -99,7 +100,9 @@ class Analyzer:
         if rule_reason: explanation.append(rule_reason)
         explanation.extend(p.reason for p in pk_indicators[:3])
         if clues: explanation.extend(clues)
-        if url_results: explanation.extend(url_results[0]['reasons'][:3])
+        if url_results:
+            explanation.extend(url_results[0]['reasons'][:3])
+            explanation.append('URL checked by offline structural rules only. Link destination and legitimacy have NOT been verified; low score does not establish safety.')
         if not explanation: explanation.append('No strong pattern flags; classification is uncertain.')
         explanation.append('Indicative AI assessment only: verify through an official channel; never share OTPs or passwords.')
         return {'verdict':verdict,'risk_score':risk,'language_detected':language,
@@ -113,6 +116,7 @@ class Analyzer:
             'url_model_status':'research_rf_diagnostic_not_in_decision' if self.url_model is not None else 'offline_structural_rules_unvalidated',
             'url_structural_rule_floor':url_rule_floor,
             'url_only_input':url_only,
+            'url_verification_status':'NOT_VERIFIED_OFFLINE_ONLY' if url_results else 'NO_URL_PROVIDED',
             'text_backend':self.text_backend,
             'text_class_scores':{x:round(100*float(p),1) for x,p in probs.items()},
             'urls':url_results,'explanation':explanation,'highlighted_terms':highlighted_terms(message),'model_evidence':[],
