@@ -13,9 +13,9 @@ _SECRET = re.compile(r'\b(?:otp|one[ -]?time[ -]?password|pin|cvv|pass(?:word|co
 # Inflected English, Roman-Urdu and Urdu commands and spelling variants.
 _PROTECT = [
     r'\b(?:do\s*not|don[\'’]?t|never|avoid|must\s+not|should\s+not)\s+(?:\w+\s+){0,5}?(?:share|send|give|tell|reveal|disclose|provide|forward)\b',
-    r'\b(?:share|send|bhej\w*|bata\w*|de\s*do|forward|provide|tell)\s+(?:na|mat|nahi|nai|nahin|nh|not|never)\b',
+    r'\b(?:share|send|bhej\w*|bata\w*|de\s*do|forward|provide|tell)\s+(?:na|mat|nahi|nai|nahin|nh|nhe|nhi|nah|nhy|not|never)\b',
     r'\b(?:mat|na|kabhi\s+na|kabhi\s+nahi|hargiz\s+na)\s+(?:\w+\s+){0,4}?(?:share|bhej\w*|bata\w*|send|forward|provide|dena|do)\b',
-    r'\b(?:share|bhej\w*|bata\w*|send|forward)\s+(?:\w+\s+){0,2}?(?:nahi|nai|nahin|nh)\s+(?:karna|karain|karein|karo|krna|krain|kren)\b',
+    r'\b(?:share|bhej\w*|bata\w*|send|forward)\s+(?:\w+\s+){0,2}?(?:nahi|nai|nahin|nh|nhe|nhi|nah|nhy)\s+(?:karna|karain|karein|karo|krna|krain|kren)\b',
     r'(?:شیئر|بتا\w*|بھیج\w*|دیں)\s*(?:نہ|مت|نہیں)\s*(?:کریں|کرنا|کرے|دیں|دو)?',
     r'(?:نہ|مت|نہیں)\s*(?:شیئر|بتا\w*|بھیج\w*|دیں|دو|کریں)',
     r'(?:کسی\s+کو\s+نہ\s*(?:بتا\w*|بھیج\w*|دیں))',
@@ -23,12 +23,14 @@ _PROTECT = [
 _PROTECT_RX = [re.compile(x,re.I|re.U) for x in _PROTECT]
 _ACTION = re.compile(r'\b(?:send|share|tell|provide|enter|submit|forward|reply|give|reveal|disclose|bhej\w*|bata\w*|batay\w*|dein|dena|daalo|dalo|likh\w*|verify\s+(?:with|using))\b|(?:بھیج\w*|بتا\w*|شیئر|درج\s*کریں|فراہم\s*کریں|دیں)',re.I|re.U)
 # Pronouns only carry a credential forward across a short adversarial clause.
+_RECIPIENT = re.compile(r'\b(?:humein|hamein|hamain|hme|hume|mujhe|mje|mujhy|hamare|hamari|our\s+(?:agent|team|staff)|to\s+us|us\s+now|this\s+(?:number|chat)|is\s+number|yahan|here)\b|ہمیں|ہمارے\s+ایجنٹ|اس\s+نمبر\s+پر', re.I|re.U)
 _PRONOUN = re.compile(r'\b(?:it|this|that|the\s+code|ye|isko|issay|woh|use|usko)\b|اسے|اس\s*کو|یہ\s*کوڈ', re.I|re.U)
 _REDIRECT = re.compile(r'\b(?:click|open|visit|follow\s+this\s+link|login\s+(?:here|at)|pay\s+(?:now|rs)|deposit|jama\s+karwa|fee\s+bhejo)\b|کلک\s*کریں|رقم\s*جمع\s*کرائیں|فیس\s*جمع\s*کریں',re.I|re.U)
 # A fake exception to a secrecy warning is itself a request.
 _EXCEPTION = re.compile(r'\b(?:except|unless|only\s+(?:to|with)|sirf\s+(?:hamare|mujhe|mujhse)|magar\s+humein|lekin\s+humein)\b|سوائے|صرف\s+ہمیں',re.I|re.U)
 _SPLIT = re.compile(r'[.!?۔؛;\n,]+|\b(?:but|however|lekin|magar)\b|(?:لیکن|مگر)',re.I|re.U)
 _PRIZE_BAIT = re.compile(r'\b(?:prize|lottery|winner|winnings|inaam|inaami|jeet\s*(?:gaye|liya|li|gya)|claim\s+(?:prize|reward)|won\s+(?:a|the|rs))\b|انعام|لاٹری|جیت\s*(?:گئے|لیا|لی)',re.I|re.U)
+_PAY_OR_REDIRECT = re.compile(r'\b(?:pay|payment|deposit|fee|fees|click|login|claim|transfer\s+(?:rs|money)|send\s+(?:rs|money)|fee\s+(?:bhej|send)|fais\s+bhejo|fees\s+bhejo|paisa\s+bhejo|paise\s+bhejo|jama\s+(?:karwa|kro)|raqam\s+bhejo)\b|فیس\s*(?:بھیج|جمع)|رقم\s*(?:بھیج|جمع)|کلک\s*کریں', re.I|re.U)
 _SOCIAL_ENGINEERING = re.compile(r'\b(?:pay\s+(?:now|rs)|transfer\s+(?:money|rs)|processing\s+fee|advance\s+fee|arrest\s+warrant|account\s+(?:will\s+be\s+)?blocked|fake\s+bank\s+agent)\b|فیس\s*جمع|گرفتاری\s*کا\s*وارنٹ', re.I|re.U)
 
 @dataclass(frozen=True)
@@ -70,12 +72,12 @@ def interpret_secret_intent(message: str) -> SecretIntent:
             requested=True
         # 'Never share your OTP. But send it to this number' has no second OTP
         # token, but is still a credential-sharing instruction.
-        elif recent_credential and not has_secret and has_unprotected_action and _PRONOUN.search(c):
+        elif recent_credential and not has_secret and has_unprotected_action and (_PRONOUN.search(c) or _RECIPIENT.search(c)):
             requested=True
         recent_credential = 2 if has_secret else max(0,recent_credential-1)
     return SecretIntent(
         protective_advice=protected,
         unsafe_secret_request=requested,
-        protective_only=protected and not requested and not _PRIZE_BAIT.search(s) and not _SOCIAL_ENGINEERING.search(s),
+        protective_only=protected and not requested and not _PRIZE_BAIT.search(s) and not _SOCIAL_ENGINEERING.search(s) and not _PAY_OR_REDIRECT.search(s),
         reason='This message advises you NOT to share a PIN, OTP or password. Mentioning a credential is not itself a request for it.' if protected and not requested else ''
     )

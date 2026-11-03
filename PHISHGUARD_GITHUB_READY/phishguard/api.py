@@ -11,11 +11,12 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field, field_validator
 from .inference import analyze_message, get_analyzer
+from .intent_ai import ENGINE_ID, MODEL_PATH as INTENT_MODEL_PATH
 from .attributions import explain_text_deletions, MAX_MESSAGE_CHARS
 
 WEB = Path(__file__).resolve().parent / 'web'
 app = FastAPI(
-    title='PhishGuard-PK', version='2.0.0',
+    title='PhishGuard-PK', version='2.1.0',
     description='Multilingual message + offline URL risk screening. Risk indicators are uncalibrated.',
 )
 # Serve all versioned first-party web assets from the actual app package.
@@ -79,7 +80,8 @@ def pdf_script():
 
 @app.get('/health')
 def health():
-    return {'status':'ok', 'project':'PhishGuard-PK', 'version':'2.0.0',
+    return {'status':'ok', 'project':'PhishGuard-PK', 'version':'2.1.0',
+            'release_id':ENGINE_ID, 'intent_ai_available':INTENT_MODEL_PATH.exists(),
             'mode':'development_unvalidated'}
 
 
@@ -87,7 +89,10 @@ def health():
 def model_status():
     root = Path(__file__).resolve().parents[1] / 'models'
     return {
-        'version':'2.0.0',
+        'version':'2.1.0',
+        'release_id':ENGINE_ID,
+        'intent_classifier':'Local open-source scikit-learn char-ngram classifier (development examples, not a pretrained LLM)',
+        'intent_ai_available':INTENT_MODEL_PATH.exists(),
         'language_support':['English','Roman Urdu','Urdu'],
         'text_model_available':(root/'text_model.joblib').exists(),
         'url_classifier_type':'Real-labeled RF' if (root/'url_model_real.joblib').exists() else 'Offline heuristic (not independently validated)',

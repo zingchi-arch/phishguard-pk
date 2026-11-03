@@ -1,5 +1,6 @@
 """Combined text and URL analysis. Scores are indicative, not calibrated fraud probabilities."""
 from pathlib import Path
+import re
 import os
 import joblib
 import numpy as np
@@ -8,6 +9,7 @@ from .urls import extract_urls, feature_vector, heuristic_url_risk, url_reasons,
 from .explain import evidence_patterns, highlighted_terms, model_top_tokens, critical_rule_risk
 from .pakistan_rules import assess_pakistani_context, looks_like_plain_greeting
 from .message_intent import interpret_secret_intent
+from .intent_ai import predict_message_intent, ENGINE_ID
 from .url_policy import assess_url
 
 MODEL_DIR = Path(__file__).resolve().parents[1] / 'models'
@@ -91,21 +93,39 @@ class Analyzer:
         # transparent heuristic guard, not model calibration or proof of safety.
         greeting_guard = looks_like_plain_greeting(message) and not urls and rule_floor == 0 and pk_floor == 0
         intent = interpret_secret_intent(message)
+        # Genuine, locally trained sklearn text-intent second opinion.
+        # This is a development classifier, not an LLM or verified fraud oracle.
+        semantic = predict_message_intent(message)
+        # A mixed warning/request merits extra caution if the ML model and a
+        # positive instruction are present. Never let an ML 'protect' label
+        # alone wipe out an actual payment, link or credential demand.
+        semantic_mixed = (semantic.label == 'mixed' and semantic.score >= 0.79 and
+                          intent.protective_advice and not intent.protective_only)
+        if semantic_mixed:
+            risk = max(risk, 65.0)
+        # AI fallback for a rare negative spelling not covered by the explicit
+        # context grammar. Requirements below prevent unconditional trust.
+        semantic_protect = (semantic.label == 'protect' and semantic.score >= 0.88 and
+                            not intent.unsafe_secret_request and
+                            bool(re.search(r'\b(?:na|nai|nhi|nhe|nah|nh|nahi|nahin|mat|never|don.?t|do not|avoid)\b|\bnot\b|نہ|مت|نہیں', message, re.I)))
         # A clearly protective OTP/PIN notice should not be labelled Scam just
         # because the synthetic-data text model fires on OTP/PIN + bank words.
         # Never apply this cap when links or another risk rule are present.
-        advisory_guard = (intent.protective_only and not urls and
+        advisory_guard = ((intent.protective_only or semantic_protect) and not urls and
+                          not semantic_mixed and not intent.unsafe_secret_request and
                           rule_floor == 0 and pk_floor == 0)
         if greeting_guard or advisory_guard:
-            risk=min(risk,39.0)
+            risk=min(risk,29.0)
         risk=round(float(min(100,max(0,risk))),1)
         verdict='Scam' if risk>=SCAM_THRESHOLD else ('Suspicious' if risk>=SUSPICIOUS_THRESHOLD else 'Safe')
         clues=evidence_patterns(message)
         explanation=[]
         if advisory_guard:
-            explanation.append(intent.reason)
+            explanation.append(intent.reason or 'The message appears to advise keeping credentials private, not requesting them. Sender identity remains unverified.')
         if greeting_guard:
             explanation.append('Ordinary personal greeting without a link, prize, payment or credential request; the sender is not authenticated.')
+        if semantic_mixed:
+            explanation.append('AI intent check identified mixed safety advice and a follow-up credential request. Do not disclose the code.')
         if rule_reason: explanation.append(rule_reason)
         explanation.extend(p.reason for p in pk_indicators[:3])
         if clues: explanation.extend(clues)
@@ -115,6 +135,10 @@ class Analyzer:
         if not explanation: explanation.append('No strong pattern flags; classification is uncertain.')
         explanation.append('Indicative AI assessment only: verify through an official channel; never share OTPs or passwords.')
         return {'verdict':verdict,'risk_score':risk,'language_detected':language,
+            'engine_release':ENGINE_ID,
+            'intent_ai':{'label':semantic.label,'model_score':semantic.score,
+                'engine':semantic.engine,'interpretation_not_authentication':True,
+                'validation':'DEVELOPMENT_ONLY_NOT_INDEPENDENTLY_VERIFIED'},
             'text_risk_indicator':round(float(text_risk),1),
             'safety_rule_floor':max(rule_floor,pk_floor),
             'pakistan_rule_ids':[p.rule_id for p in pk_indicators],

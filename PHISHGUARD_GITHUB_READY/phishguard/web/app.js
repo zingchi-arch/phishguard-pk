@@ -7,9 +7,26 @@ const samples={
  link:'Dear customer, your bank account is blocked. Verify immediately at http://bank-security.example/verify-login'
 };
 let last=null;let batch=[];let lastAnalyzedMessage="";let requestSequence=0;
+const EXPECTED_ENGINE='step59-intent-hybrid-v1';
 function text(el,value){el.textContent=value;}
 function dom(tag,cls,value){const e=document.createElement(tag);if(cls)e.className=cls;if(value!==undefined)text(e,String(value));return e;}
 function clearChildren(el){while(el.firstChild)el.removeChild(el.firstChild)}
+// Check the actual BACKEND release. Static frontend changes alone are not proof
+// that Vercel is running the new inference engine.
+(async()=>{
+  const node=$('#engine-tag');
+  if(!node)return;
+  try{
+    const response=await fetch('/health',{cache:'no-store'});
+    const data=response.ok?await response.json():{};
+    if(data.release_id===EXPECTED_ENGINE && data.intent_ai_available){
+      text(node,'Intent AI active · Step 59');
+    }else{
+      text(node,'Old backend detected · update pending');
+      node.closest('.tag')?.setAttribute('title','The live server has not deployed the Step 59 intent engine.');
+    }
+  }catch{text(node,'Engine version unavailable');}
+})();
 function showError(msg){const e=$('#error');text(e,msg);e.hidden=false}
 function hideError(){$('#error').hidden=true}
 function switchTab(which){const single=which==='single';$('#single-panel').hidden=!single;$('#batch-panel').hidden=single;$('#single-tab').classList.toggle('active',single);$('#batch-tab').classList.toggle('active',!single);$('#single-tab').setAttribute('aria-selected',String(single));$('#batch-tab').setAttribute('aria-selected',String(!single));}
@@ -35,7 +52,7 @@ function render(result){last=result;$('#result').hidden=false;
     dom('div','url-status','Not authenticated or opened. A low number is not a safety guarantee.'));
   urls.appendChild(card)
  });
- const signals=$('#signals');clearChildren(signals);[ ['Raw text-model indicator (before context)',result.text_risk_indicator], ['Highest URL risk',result.url_risk_indicator===null?'N/A':result.url_risk_indicator], ['Safety rule minimum',result.safety_rule_floor], ['Credential-sharing context',result.credential_request_detected?'Request detected':(result.security_advice_guard_applied?'Protective advice': 'Not established')] ].forEach(([a,b])=>signals.appendChild(dom('div','',`${a}: ${b}`)));
+ const signals=$('#signals');clearChildren(signals);[ ['Raw text-model indicator (before context)',result.text_risk_indicator], ['Highest URL risk',result.url_risk_indicator===null?'N/A':result.url_risk_indicator], ['Safety rule minimum',result.safety_rule_floor], ['Credential-sharing context',result.credential_request_detected?'Request detected':(result.security_advice_guard_applied?'Protective advice': 'Not established')], ['AI message intent',({protect:'Safety advice',request:'Credential request',mixed:'Mixed warning + request',other:'Other or uncertain',unavailable:'Model unavailable'})[result.intent_ai?.label]||'Legacy engine'], ['Backend release',result.engine_release||'OLD BACKEND / NOT UPDATED'] ].forEach(([a,b])=>signals.appendChild(dom('div','',`${a}: ${b}`)));
 }
 $('#check').onclick=async()=>{
  hideError();const m=$('#message').value.trim();
@@ -48,6 +65,9 @@ $('#check').onclick=async()=>{
    // a result for old text, or allow exporting the stale message as a PDF.
    if(myRequest!==requestSequence)return;
    lastAnalyzedMessage=m;render(data);
+   if(data.engine_release!==EXPECTED_ENGINE){
+     showError('Old detection backend is still active. The Step 59 fix has NOT been deployed yet.');
+   }
    $('#result').scrollIntoView({behavior:'smooth',block:'nearest'});
  }catch(e){if(myRequest===requestSequence)showError(e.message)}
  finally{btn.disabled=false;btn.innerHTML='Analyze message <svg class="icon"><use href="#i-arrow"></use></svg>'}
