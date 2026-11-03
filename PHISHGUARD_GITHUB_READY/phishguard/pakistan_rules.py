@@ -6,6 +6,7 @@ This file includes separate Urdu-script, Roman Urdu and English variants.
 """
 from __future__ import annotations
 import re
+from .message_intent import interpret_secret_intent
 from dataclasses import dataclass
 
 
@@ -56,7 +57,7 @@ def assess_pakistani_context(message: str, sender_id: str | None = None, claimed
     asks_money = bool(PAID.search(text))
     # Evaluate per clause: 'Never share OTP. Now send your PIN' is NOT safe.
     clauses = re.split(r'[.!?۔;\n]+|\b(?:but|lekin|magar)\b', text, flags=re.I)
-    has_secret_request = any(SECRET.search(c) and ASK_SECRET.search(c) and not NEGATION.search(c) for c in clauses)
+    has_secret_request = interpret_secret_intent(text).unsafe_secret_request
     # Negation is a safeguard only for secret-sharing advice, NOT a blanket
     # exemption for a different prize claim appearing in the same message.
     # Generic words such as 'avoid' (e.g. 'pay to avoid arrest') are

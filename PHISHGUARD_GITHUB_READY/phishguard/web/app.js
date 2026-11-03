@@ -35,7 +35,7 @@ function render(result){last=result;$('#result').hidden=false;
     dom('div','url-status','Not authenticated or opened. A low number is not a safety guarantee.'));
   urls.appendChild(card)
  });
- const signals=$('#signals');clearChildren(signals);[ ['Text risk',result.text_risk_indicator], ['Highest URL risk',result.url_risk_indicator===null?'N/A':result.url_risk_indicator], ['Safety rule minimum',result.safety_rule_floor] ].forEach(([a,b])=>signals.appendChild(dom('div','',`${a}: ${b}`)));
+ const signals=$('#signals');clearChildren(signals);[ ['Raw text-model indicator (before context)',result.text_risk_indicator], ['Highest URL risk',result.url_risk_indicator===null?'N/A':result.url_risk_indicator], ['Safety rule minimum',result.safety_rule_floor], ['Credential-sharing context',result.credential_request_detected?'Request detected':(result.security_advice_guard_applied?'Protective advice': 'Not established')] ].forEach(([a,b])=>signals.appendChild(dom('div','',`${a}: ${b}`)));
 }
 $('#check').onclick=async()=>{
  hideError();const m=$('#message').value.trim();

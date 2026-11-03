@@ -7,6 +7,7 @@ from .preprocessing import detect_language
 from .urls import extract_urls, feature_vector, heuristic_url_risk, url_reasons, url_features
 from .explain import evidence_patterns, highlighted_terms, model_top_tokens, critical_rule_risk
 from .pakistan_rules import assess_pakistani_context, looks_like_plain_greeting
+from .message_intent import interpret_secret_intent
 from .url_policy import assess_url
 
 MODEL_DIR = Path(__file__).resolve().parents[1] / 'models'
@@ -89,12 +90,20 @@ class Analyzer:
         # Only pure, no-link, no-action social greetings qualify. This is a
         # transparent heuristic guard, not model calibration or proof of safety.
         greeting_guard = looks_like_plain_greeting(message) and not urls and rule_floor == 0 and pk_floor == 0
-        if greeting_guard:
+        intent = interpret_secret_intent(message)
+        # A clearly protective OTP/PIN notice should not be labelled Scam just
+        # because the synthetic-data text model fires on OTP/PIN + bank words.
+        # Never apply this cap when links or another risk rule are present.
+        advisory_guard = (intent.protective_only and not urls and
+                          rule_floor == 0 and pk_floor == 0)
+        if greeting_guard or advisory_guard:
             risk=min(risk,39.0)
         risk=round(float(min(100,max(0,risk))),1)
         verdict='Scam' if risk>=SCAM_THRESHOLD else ('Suspicious' if risk>=SUSPICIOUS_THRESHOLD else 'Safe')
         clues=evidence_patterns(message)
         explanation=[]
+        if advisory_guard:
+            explanation.append(intent.reason)
         if greeting_guard:
             explanation.append('Ordinary personal greeting without a link, prize, payment or credential request; the sender is not authenticated.')
         if rule_reason: explanation.append(rule_reason)
@@ -111,6 +120,9 @@ class Analyzer:
             'pakistan_rule_ids':[p.rule_id for p in pk_indicators],
             'sender_authentication':'NOT_VERIFIED',
             'personal_greeting_guard_applied':greeting_guard,
+            'security_advice_detected':intent.protective_advice,
+            'security_advice_guard_applied':advisory_guard,
+            'credential_request_detected':intent.unsafe_secret_request,
             'decision_thresholds':{'suspicious':SUSPICIOUS_THRESHOLD, 'scam':SCAM_THRESHOLD},
             'url_risk_indicator':round(float(url_risk),1) if urls else None,
             'url_model_status':'research_rf_diagnostic_not_in_decision' if self.url_model is not None else 'offline_structural_rules_unvalidated',
