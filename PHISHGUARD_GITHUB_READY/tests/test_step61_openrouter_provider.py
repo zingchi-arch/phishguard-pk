@@ -18,7 +18,7 @@ def test_openrouter_preferred_over_groq_and_health_hides_keys(monkeypatch):
     monkeypatch.setenv('OPENROUTER_API_KEY', 'private-openrouter')
     assert deep_ai.provider_config() == ('OpenRouter', 'openrouter/free')
     data = client.get('/health').json()
-    assert data['version'] in ('2.3.0', '2.4.0')
+    assert data['version'] in ('2.3.0', '2.4.0', '2.5.0')
     assert data['deep_ai_release_id'] == deep_ai.DEEP_AI_RELEASE
     assert data['deep_ai_provider'] == 'OpenRouter'
     assert data['deep_ai_configured'] is True

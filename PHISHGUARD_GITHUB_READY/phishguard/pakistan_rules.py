@@ -46,6 +46,37 @@ PRIZE_WARNING = rx(r'\b(?:beware|fraud\s*alert|scam\s*alert|scams?\s+(?:are\s+)?
 IMMEDIATE_RESPONSE = rx(r'\b(?:abhi|foran|immediately|urgent|call\s*karein|sms\s*karin|pin\s*code\s*dain|details\s*send|warna)\b|فوراً|ابھی|ورنہ|فوری')
 
 
+# Step 64: high-context, *local* friend-impersonation/payment redirection.
+# These signals are NOT evidence that the claimed sender is really a friend.
+# A named introduction alone, a bank alert, or a mobile number alone is not a scam.
+URGENT_MONEY = rx(r'\b(?:urgent|urgently|urgnt|arjunt|arjant|arjent|emergency|asap|immediately|abhi|jaldi|jldi|foran|forun|fauran|fouri|fori|zaroori|zaruri|zrori|zroori|bohat\s+zroori|bhot\s+zroori|majboori|majbur[iy]|needed\s+now|right\s+now)\b|فوری|فوراً|جلدی|ابھی|ارجنٹ|ضروری|مجبوری|مجبور')
+WALLET_TRANSFER = rx(r'\b(?:jazz\s*cash|jazzcash|easypaisa|easy\s*paisa|sadapay|nayapay|wallet|bank\s+transfer|bank\s+account|account\s+number|raast|raqam|raqm|paisa|paise|paisay|rupay|rupees|pkr)\b|جاز\s*کیش|ایزی\s*پیسہ|راست|رقم|روپے|پیسے|بینک\s*اکاؤنٹ')
+MONEY_COMMAND = rx(r'\b(?:transfer(?=\s+(?:money|funds|rs|pkr|now|please|to|kar\w*|kr\w*|[1-9]\d{2,6}))|send|pay|deposit|bhej\w*|bhejdo|bjejo|bhijwa\w*|karwa\w*|krwa\w*|krdo|kardo|kar\s+do|kr\s+do|kro|krain|karein|karen|jama\s*kar|send\s*krdo|jazzcash\s*krdo|easy\s*paisa\s*krdo|udhar\s*de\s*do|lend\s*me)\b|بھیج|بھیجیں|بھیجو|ٹرانسفر|ٹرانسفر\s*کریں|جمع\s*کرو|رقم\s*دو|کر\s*دو|بھیج\s*دو')
+PAYMENT_RECIPIENT = rx(r'\b(?:is|iss|es|us|ye|this|another|new|dusre|naye)\s+(?:number|num|no\.?|nمبر|mobile|phone|account|jazzcash)\s*(?:par|pe|pr|per|py|on|to)?\b|\b(?:number|num|mobile|phone|account)\s*(?:par|pe|pr|per|py)\b|اس\s*نمبر\s*پر|اس\s*اکاؤنٹ\s*میں|اس\s*موبائل\s*پر')
+CLAIMED_PERSONAL_IDENTITY = rx(r'\b(?:ma|mai|main|mein|me|mn)\s+[a-z]{2,28}\s+(?:(?:baat|bat)\s+(?:kar\w*|kr\w*|ker\w*)\s+(?:hoo|hoon|hun|hn|hon|hu)|(?:bol\w*|bol\s+rah\w*)\s*(?:hoo|hoon|hun|hn|hon|hu)?)\b|\b(?:this\s+is|i\s+am|i.m)\s+[a-z]{2,28}\b|میں\s+[^\s،۔]{2,25}\s+(?:بول|بات)')
+# Explicit safety-awareness discussion about such a message, not a solicitation.
+PAYMENT_SCAM_AWARENESS = rx(r'\b(?:scam\s*alert|fraud\s*alert|fraud\s*awareness|fake\s*(?:message|sms|request)|beware\s+of|example\s+of\s+(?:a\s+)?(?:fake|scam)|never\s+send\s+(?:money|funds)|do\s+not\s+(?:send|transfer)\s+(?:money|funds)|paise\s+(?:mat|na|nahi)\s+bhej\w*|paise\s+bhej\w*\s+(?:mat|na|nahi)|paisay\s+(?:mat|na)\s+bhej\w*)\b|ایسے\s*پیغام\s*سے\s*بچیں|فراڈ\s*سے\s*خبردار|پیسے\s*مت\s*بھیج')
+# The digit count deliberately excludes Pakistani 03xx mobile numbers (11 digits).
+MONEY_VALUE = re.compile(r'(?<![0-9])(?:[1-9]\d{0,2}(?:,\d{3})+|[1-9]\d{3,6})(?![0-9])')
+MONEY_K = rx(r'\b(\d{1,4})\s*k\b')
+MONEY_HAZAR = rx(r'\b(\d{1,3}|pachas|pachaas|pachass|fifty)\s*(?:hazar|hazaar|thousand)\b|پچاس\s*ہزار|پچاس\s*ہزار')
+
+
+def _large_money_request(message: str) -> bool:
+    for match in MONEY_VALUE.finditer(message):
+        amount = int(match.group().replace(',', ''))
+        if amount >= 10000:
+            return True
+    for match in MONEY_K.finditer(message):
+        if int(match.group(1)) >= 10:
+            return True
+    for match in MONEY_HAZAR.finditer(message):
+        digits = match.group(1)
+        if digits is None or not digits.isdigit() or int(digits) >= 10:
+            return True
+    return False
+
+
 
 @dataclass(frozen=True)
 class Indicator:
@@ -69,6 +100,28 @@ def assess_pakistani_context(message: str, sender_id: str | None = None, claimed
     # Generic words such as 'avoid' (e.g. 'pay to avoid arrest') are
     # NOT a security warning.  Use an explicit advice phrase instead.
     protect_secret_advice = bool(SECURITY_WARNING.search(text))
+
+    # Combine multiple independent, actionable cues. A friend can genuinely
+    # request help, so label this a *high-risk impersonation/payment pattern*,
+    # never a proven fake identity or verified contact.
+    demands_transfer = bool(MONEY_COMMAND.search(text)) and bool(WALLET_TRANSFER.search(text) or _large_money_request(text))
+    is_urgent = bool(URGENT_MONEY.search(text))
+    personal_mobile = bool(PRIVATE_MOBILE.search(text))
+    large_amount = _large_money_request(text)
+    claimed_friend = bool(CLAIMED_PERSONAL_IDENTITY.search(text))
+    asks_other_number = bool(PAYMENT_RECIPIENT.search(text))
+    awareness = bool(PAYMENT_SCAM_AWARENESS.search(text))
+    if demands_transfer and not awareness:
+        if large_amount and is_urgent and personal_mobile and (claimed_friend or asks_other_number):
+            flags.append(Indicator(93, 'An urgent large-money request claims a personal identity and/or redirects payment to a private mobile number. This is a common friend-impersonation pattern; caller identity and account ownership are NOT verified. Confirm directly using a trusted contact method.', 'PK_FRIEND_IMPERSONATION_URGENT_TRANSFER'))
+        elif large_amount and is_urgent and personal_mobile:
+            flags.append(Indicator(88, 'Urgent large payment to a private mobile number. The recipient is not verified; call the person using a previously known contact before sending money.', 'PK_URGENT_LARGE_PRIVATE_TRANSFER'))
+        elif large_amount and is_urgent and claimed_friend:
+            flags.append(Indicator(78, 'High-value urgent payment requested by someone claiming a personal identity. This message alone cannot verify they are your contact.', 'PK_URGENT_CLAIMED_FRIEND_TRANSFER'))
+        elif large_amount and personal_mobile and (claimed_friend or asks_other_number):
+            flags.append(Indicator(64, 'Large payment request to a personal or newly supplied mobile account. Sender and account ownership are unverified; confirm independently.', 'PK_LARGE_PRIVATE_WALLET_REQUEST'))
+        elif is_urgent and personal_mobile and (claimed_friend or asks_other_number):
+            flags.append(Indicator(58, 'Urgent transfer to a private number. Check independently that the recipient is who they claim to be.', 'PK_URGENT_PRIVATE_WALLET_REQUEST'))
 
     if BISP.search(context) and CLAIM.search(text) and (has_contact or has_link or asks_money):
         flags.append(Indicator(88, 'BISP benefit claim with external contact, link, or payment instruction. Check independently through official 8171 channels.', 'PK_BISP_REDIRECT'))

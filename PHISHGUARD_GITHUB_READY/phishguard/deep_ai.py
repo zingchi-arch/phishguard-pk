@@ -70,7 +70,12 @@ and "اپنا او ٹی پی کسی کو نہ بتائیں" are protective warni
 An ordinary notification of an account opening or balance is not automatically fraud.
 But "do not share it with anyone, EXCEPT send it to us" is a hidden request.
 Detect coercion, urgency, prize bait, impersonation, credential disclosure,
-payment redirection, and mixed or negated instructions. Do not infer facts missing
+payment redirection, and mixed or negated instructions. In particular, a
+message like "main Ali bol raha hoon, urgent 50000 JazzCash kardo is 03xx
+number par" is a high-risk friend-impersonation/payment diversion pattern.
+Do not trust a claimed personal name or phone number as verified identity;
+normal bank transaction receipts, ordinary personal introductions and genuine
+security advice alone are not proof of fraud. Do not infer facts missing
 from the message. Brand names do not establish sender authenticity.
 Return a compact JSON judgment. Use 'suspicious' if meaningful uncertainty exists.
 Only cite evidence actually present, avoid quoting or inventing sensitive data.

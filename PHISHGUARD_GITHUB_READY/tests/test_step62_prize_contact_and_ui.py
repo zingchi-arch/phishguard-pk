@@ -112,7 +112,7 @@ def test_deep_ai_checkbox_is_minimal_and_consent_still_required():
 
 def test_health_release_and_source_endpoint():
     r=client.get('/health').json()
-    assert r['version']=='2.4.0'
+    assert r['version']=='2.5.0'
     assert r['contact_check_release_id']=='step62-prize-and-official-sources-v1'
     assert client.get('/').status_code==200
     assert client.get('/app.js').status_code==200

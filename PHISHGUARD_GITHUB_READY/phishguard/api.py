@@ -18,7 +18,7 @@ from .official_contacts import crosscheck_known_official_page
 
 WEB = Path(__file__).resolve().parent / 'web'
 app = FastAPI(
-    title='PhishGuard-PK', version='2.4.0',
+    title='PhishGuard-PK', version='2.5.0',
     description='Multilingual message + offline URL risk screening. Risk indicators are uncalibrated.',
 )
 # Serve all versioned first-party web assets from the actual app package.
@@ -86,20 +86,22 @@ def pdf_script():
 
 @app.get('/health')
 def health():
-    return {'status':'ok', 'project':'PhishGuard-PK', 'version':'2.4.0',
+    return {'status':'ok', 'project':'PhishGuard-PK', 'version':'2.5.0',
             'release_id':ENGINE_ID, 'intent_ai_available':INTENT_MODEL_PATH.exists(),
             'mode':'development_unvalidated',
             'deep_ai_release_id':DEEP_AI_RELEASE, 'deep_ai_configured':is_configured(),
             'deep_ai_provider':(provider_config() or ('None', 'none'))[0],
-            'contact_check_release_id':'step62-prize-and-official-sources-v1'}
+            'contact_check_release_id':'step62-prize-and-official-sources-v1',
+            'payment_fraud_release_id':'step64-urgent-personal-transfer-v1'}
 
 
 @app.get('/model-status')
 def model_status():
     root = Path(__file__).resolve().parents[1] / 'models'
     return {
-        'version':'2.4.0',
+        'version':'2.5.0',
         'deep_ai_release_id':DEEP_AI_RELEASE,
+        'payment_fraud_release_id':'step64-urgent-personal-transfer-v1',
         'deep_ai_configured':is_configured(),
         'deep_ai_model':(provider_config() or ('None', DEEP_MODEL_ID))[1],
         'deep_ai_provider':(provider_config() or ('None', 'none'))[0],
