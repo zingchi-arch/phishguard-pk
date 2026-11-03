@@ -8,6 +8,7 @@ const samples={
 };
 let last=null;let batch=[];let lastAnalyzedMessage="";let requestSequence=0;
 const EXPECTED_ENGINE='step59-intent-hybrid-v1';
+const EXPECTED_DEEP_AI='step61-openrouter-free-hybrid-v1';
 function text(el,value){el.textContent=value;}
 function dom(tag,cls,value){const e=document.createElement(tag);if(cls)e.className=cls;if(value!==undefined)text(e,String(value));return e;}
 function clearChildren(el){while(el.firstChild)el.removeChild(el.firstChild)}
@@ -20,12 +21,22 @@ function clearChildren(el){while(el.firstChild)el.removeChild(el.firstChild)}
     const response=await fetch('/health',{cache:'no-store'});
     const data=response.ok?await response.json():{};
     if(data.release_id===EXPECTED_ENGINE && data.intent_ai_available){
-      text(node,'Intent AI active · Step 59');
+      text(node, data.deep_ai_release_id===EXPECTED_DEEP_AI ? 'Step 61 · Deep AI ready' : 'Intent AI active · Step 59');
     }else{
       text(node,'Old backend detected · update pending');
       node.closest('.tag')?.setAttribute('title','The live server has not deployed the Step 59 intent engine.');
     }
-  }catch{text(node,'Engine version unavailable');}
+    const optin=$('#deep-ai-optin');
+    const availability=$('#deep-ai-availability');
+    if(data.deep_ai_release_id===EXPECTED_DEEP_AI && data.deep_ai_configured===true){
+      optin.disabled=false;
+      text(availability,`Deep AI available via ${data.deep_ai_provider||'external provider'}. Sends best-effort redacted text only after opt-in.`);
+    }else if(data.deep_ai_release_id===EXPECTED_DEEP_AI){
+      text(availability,'Deep AI not configured. Set OPENROUTER_API_KEY in Vercel. Local AI still works.');
+    }else{
+      text(availability,'Deep AI requires the Step 61 GitHub update. Local AI remains available.');
+    }
+  }catch{text(node,'Engine version unavailable');text($('#deep-ai-availability'),'Deep AI availability unavailable. Local analysis still works.');}
 })();
 function showError(msg){const e=$('#error');text(e,msg);e.hidden=false}
 function hideError(){$('#error').hidden=true}
@@ -40,6 +51,21 @@ $('#clear').onclick=()=>{$('#message').value='';$('#message').dispatchEvent(new 
 document.querySelectorAll('.example').forEach(b=>b.onclick=()=>{$('#message').value=samples[b.dataset.sample];$('#message').dispatchEvent(new Event('input'));$('#message').focus();});
 async function post(path,body){const r=await fetch(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});let j;try{j=await r.json()}catch{throw new Error('Server response was not readable.')}if(!r.ok)throw new Error((typeof j.detail==='string'?j.detail:JSON.stringify(j.detail))||'Unable to analyze');return j}
 function render(result){last=result;$('#result').hidden=false;
+ const deepPanel=$('#deep-ai-result');clearChildren(deepPanel);deepPanel.hidden=true;
+ if(result.deep_ai){
+   deepPanel.hidden=false;
+   const ai=result.deep_ai;
+   if(ai.status==='complete'){
+     deepPanel.appendChild(dom('strong','',`${ai.external_provider||'External AI'} (${ai.model||'open model'}) second opinion: ${ai.remote_verdict} · ${ai.intent.replaceAll('_',' ')}`));
+     deepPanel.appendChild(dom('p','',`Local AI: ${ai.local_verdict} · Combined result: ${result.verdict}. ${ai.reason}`));
+     deepPanel.appendChild(dom('p','muted small',ai.fusion_note));
+   }else{
+     deepPanel.appendChild(dom('strong','', 'Deep AI unavailable, local analysis shown'));
+     const provider=ai.external_provider||'External AI';
+     const label=({not_configured:'Owner has not configured the external AI key',rate_limited:`${provider} free limit reached`,app_rate_limited:'Demo Deep AI allowance temporarily reached',network_unavailable:`${provider} network unavailable`,credential_error:`${provider} key rejected`,provider_error:`${provider} provider error`,invalid_provider_response:`${provider} response could not be verified`})[ai.status]||`${provider} unavailable`;
+     deepPanel.appendChild(dom('p','',`${label}. External AI was not used for this result.`));
+   }
+ }
  $('#link-caution').hidden=!(result.urls && result.urls.length);
  $('#model-evidence').hidden=true;clearChildren($('#model-evidence'));
  $('#explain-model').hidden=!!result.url_only_input||lastAnalyzedMessage.length>900;const v=result.verdict;const cls=v.toLowerCase();const verdict=$('#verdict');text(verdict,v);verdict.className=`verdict ${cls}`;text($('#score'),Number(result.risk_score).toFixed(1));text($('#result-language'),`Detected language: ${result.language_detected}`);let fill=$('#meter-fill');fill.style.width=`${Math.min(100,Math.max(0,result.risk_score))}%`;fill.style.background=v==='Safe'?'#19a87c':v==='Suspicious'?'#e7a33a':'#d54a54';
@@ -60,7 +86,9 @@ $('#check').onclick=async()=>{
  const myRequest=++requestSequence;const btn=$('#check');
  btn.disabled=true;text(btn,'Analyzing...');
  try{
-   const data=await post('/analyze',{message:m});
+   const useDeep=$('#deep-ai-optin').checked && !$('#deep-ai-optin').disabled;
+   if(useDeep && m.length>2000)throw new Error('Deep AI accepts up to 2,000 characters. Untick Deep AI for longer messages.');
+   const data=await post(useDeep?'/analyze/deep':'/analyze',useDeep?{message:m,consent_external_processing:true}:{message:m});
    // A mobile user may edit the field while this fetch is running. Never show
    // a result for old text, or allow exporting the stale message as a PDF.
    if(myRequest!==requestSequence)return;

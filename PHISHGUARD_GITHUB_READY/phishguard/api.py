@@ -12,11 +12,12 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field, field_validator
 from .inference import analyze_message, get_analyzer
 from .intent_ai import ENGINE_ID, MODEL_PATH as INTENT_MODEL_PATH
+from .deep_ai import DEEP_AI_RELEASE, MODEL_ID as DEEP_MODEL_ID, MAX_DEEP_CHARS, is_configured, provider_config, analyze_with_deep_ai
 from .attributions import explain_text_deletions, MAX_MESSAGE_CHARS
 
 WEB = Path(__file__).resolve().parent / 'web'
 app = FastAPI(
-    title='PhishGuard-PK', version='2.1.0',
+    title='PhishGuard-PK', version='2.3.0',
     description='Multilingual message + offline URL risk screening. Risk indicators are uncalibrated.',
 )
 # Serve all versioned first-party web assets from the actual app package.
@@ -35,6 +36,10 @@ class MessageRequest(BaseModel):
         if not value.strip():
             raise ValueError('Message must not be empty')
         return value
+
+
+class DeepMessageRequest(MessageRequest):
+    consent_external_processing: bool = Field(default=False, description='User explicitly agrees to send best-effort redacted message data to the selected provider')
 
 
 class BatchRequest(BaseModel):
@@ -80,16 +85,24 @@ def pdf_script():
 
 @app.get('/health')
 def health():
-    return {'status':'ok', 'project':'PhishGuard-PK', 'version':'2.1.0',
+    return {'status':'ok', 'project':'PhishGuard-PK', 'version':'2.3.0',
             'release_id':ENGINE_ID, 'intent_ai_available':INTENT_MODEL_PATH.exists(),
-            'mode':'development_unvalidated'}
+            'mode':'development_unvalidated',
+            'deep_ai_release_id':DEEP_AI_RELEASE, 'deep_ai_configured':is_configured(),
+            'deep_ai_provider':(provider_config() or ('None', 'none'))[0]}
 
 
 @app.get('/model-status')
 def model_status():
     root = Path(__file__).resolve().parents[1] / 'models'
     return {
-        'version':'2.1.0',
+        'version':'2.3.0',
+        'deep_ai_release_id':DEEP_AI_RELEASE,
+        'deep_ai_configured':is_configured(),
+        'deep_ai_model':(provider_config() or ('None', DEEP_MODEL_ID))[1],
+        'deep_ai_provider':(provider_config() or ('None', 'none'))[0],
+        'deep_ai_default':'OFF_EXTERNAL_CONSENT_REQUIRED',
+        'deep_ai_privacy':'Best-effort redaction before sending to configured external AI provider; do not submit private information',
         'release_id':ENGINE_ID,
         'intent_classifier':'Local open-source scikit-learn char-ngram classifier (development examples, not a pretrained LLM)',
         'intent_ai_available':INTENT_MODEL_PATH.exists(),
@@ -166,6 +179,22 @@ def research_status():
 def analyze(payload: MessageRequest):
     try:
         return analyze_message(payload.message,sender_id=payload.sender_id,claimed_org=payload.claimed_org)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+
+@app.post('/analyze/deep')
+def analyze_deep(payload: DeepMessageRequest):
+    # An explicit affirmative signal is required. Never auto-send local traffic.
+    if not payload.consent_external_processing:
+        raise HTTPException(status_code=422, detail='You must opt in to Groq external processing for this request.')
+    if len(payload.message) > MAX_DEEP_CHARS:
+        raise HTTPException(status_code=422, detail=f'Deep AI supports at most {MAX_DEEP_CHARS} characters.')
+    try:
+        local = analyze_message(payload.message, sender_id=payload.sender_id, claimed_org=payload.claimed_org)
+        return analyze_with_deep_ai(payload.message, local)
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     except RuntimeError as exc:
